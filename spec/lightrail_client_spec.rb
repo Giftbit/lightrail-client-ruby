@@ -5,7 +5,7 @@ RSpec.describe Lightrail do
     expect(Lightrail::VERSION).not_to be nil
   end
 
-  it "does something useful" do
-    expect(false).to eq(true)
+  it "stores the base URL for the Lightrail API" do
+    expect(Lightrail.api_base).to eq('https://dev.lightrail.com/v1').or(eq('https://api.lightrail.com/v1'))
   end
 end
