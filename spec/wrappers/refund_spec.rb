@@ -5,28 +5,37 @@ RSpec.describe Lightrail::Refund do
 
   let(:lightrail_connection) {Lightrail::Connection}
 
-  let(:charge_object_details) {{
-      cardId: 'card-123456',
-      codeLastFour: 'TEST',
-      currency: 'USD',
-      transactionId: 'transaction-123456',
-      transactionType: 'DRAWDOWN',
-      userSuppliedId: '123-abc-456-def',
-      value: -1,
-  }}
+  let(:example_card_id) {'this-is-a-card-id'}
+  let(:example_transaction_id) {'this-is-a-transaction-id'}
+
+  let(:charge_object) {Lightrail::LightrailCharge.new({
+                                                          transactionId: example_transaction_id,
+                                                          value: -5,
+                                                          userSuppliedId: 'abc123def456xxx',
+                                                          transactionType: 'DRAWDOWN',
+                                                          cardId: example_card_id,
+                                                          currency: 'USD'
+                                                      })}
 
   describe ".create" do
 
     context "when given valid params" do
       it "refunds a transaction" do
-        charge = Lightrail::LightrailCharge.new(charge_object_details)
-
         expect(lightrail_connection).
             to receive(:make_post_request_and_parse_response).
-                with(/cards\/#{charge.cardId}\/transactions\/#{charge.transactionId}\/refund/, Hash).
+                with(/cards\/#{charge_object.cardId}\/transactions\/#{charge_object.transactionId}\/refund/, Hash).
                 and_return({"transaction" => {}})
 
-        refund.create(charge)
+        refund.create(charge_object)
+      end
+
+      it "uses the userSuppliedId if provided" do
+        expect(lightrail_connection).
+            to receive(:make_post_request_and_parse_response).
+                with(/cards\/#{charge_object.cardId}\/transactions\/#{charge_object.transactionId}\/refund/, hash_including(userSuppliedId: 'use-this-user-supplied-id')).
+                and_return({"transaction" => {}})
+
+        refund.create(charge_object, {userSuppliedId: 'use-this-user-supplied-id'})
       end
     end
 

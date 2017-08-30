@@ -85,7 +85,9 @@ module Lightrail
 
     def self.validate_transaction_response! (transaction_response)
       begin
-        return true if (transaction_response.is_a? Hash) && self.has_valid_transaction_id?(transaction_response) && self.has_valid_card_id?(transaction_response)
+        return true if (transaction_response.is_a? Hash) &&
+            self.has_valid_transaction_id?(transaction_response) &&
+            self.has_valid_card_id?(transaction_response)
       rescue Lightrail::LightrailArgumentError
       end
       raise Lightrail::LightrailArgumentError.new("Invalid transaction_response: #{transaction_response.inspect}")
