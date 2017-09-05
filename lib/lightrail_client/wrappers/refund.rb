@@ -15,7 +15,7 @@ module Lightrail
 
       response = Lightrail::Transaction.handle_transaction(hash_of_original_transaction_response, :refund, body)
 
-      Lightrail::LightrailCharge.new(response)
+      self.new(response)
     end
 
   end

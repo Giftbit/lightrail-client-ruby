@@ -26,7 +26,8 @@ RSpec.describe Lightrail::Refund do
                 with(/cards\/#{charge_object.cardId}\/transactions\/#{charge_object.transactionId}\/refund/, Hash).
                 and_return({"transaction" => {}})
 
-        refund.create(charge_object)
+        refund_obj = refund.create(charge_object)
+        expect(refund_obj).to be_a(refund)
       end
 
       it "uses the userSuppliedId if provided" do
