@@ -29,8 +29,8 @@ module Lightrail
         return validated_params if ((validated_params.is_a? Hash) &&
             self.set_cardId!(validated_params, validated_params) &&
             self.validate_amount!(validated_params[:amount] || validated_params[:value]) &&
-            self.validate_currency!(validated_params[:currency])) &&
-            self.get_or_set_userSuppliedId!(validated_params)
+            self.validate_currency!(validated_params[:currency]) &&
+            self.get_or_set_userSuppliedId!(validated_params))
       rescue Lightrail::LightrailArgumentError
       end
       raise Lightrail::LightrailArgumentError.new("Invalid charge_params for set_params_for_card_id_drawdown!: #{charge_params.inspect}")
@@ -42,8 +42,8 @@ module Lightrail
         return validated_params if ((validated_params.is_a? Hash) &&
             self.set_cardId!(validated_params, validated_params) &&
             self.validate_amount!(validated_params[:amount] || validated_params[:value]) &&
-            self.validate_currency!(validated_params[:currency])) &&
-            self.get_or_set_userSuppliedId!(validated_params)
+            self.validate_currency!(validated_params[:currency]) &&
+            self.get_or_set_userSuppliedId!(validated_params))
       rescue Lightrail::LightrailArgumentError
       end
       raise Lightrail::LightrailArgumentError.new("Invalid fund_params for set_params_for_card_id_fund!: #{fund_params.inspect}")
@@ -85,7 +85,9 @@ module Lightrail
 
     def self.validate_transaction_response! (transaction_response)
       begin
-        return true if (transaction_response.is_a? Hash) && self.has_valid_transaction_id?(transaction_response) && self.has_valid_card_id?(transaction_response)
+        return true if (transaction_response.is_a? Hash) &&
+            self.has_valid_transaction_id?(transaction_response) &&
+            self.has_valid_card_id?(transaction_response)
       rescue Lightrail::LightrailArgumentError
       end
       raise Lightrail::LightrailArgumentError.new("Invalid transaction_response: #{transaction_response.inspect}")
