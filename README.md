@@ -6,7 +6,7 @@ Lightrail is a modern platform for digital account credits, gift cards, promotio
 
 The following features are supported in this version:
 
-- Gift Cards: charge, balance-check, and fund.
+- Gift Cards: charge, refund, balance-check, and fund.
 
 Note that the Lightrail API supports many other features and we are working on covering them in this gem. For the full picture of Lightrail API features check out the [Lightrail API documentation](https://www.lightrail.com/docs/).
 
@@ -18,30 +18,13 @@ Before using any parts of the library, you need to set up your Lightrail API key
 Lightrail.api_key = "<your lightrail API key>";
 ```
 
+*A note on sample code snippets: for reasons of legibility, the output for most calls has been simplified. Attributes of response objects that are not relevant here have been omitted.*
+
 ## Related Projects
 
 - [Lightrail Stripe Gem](https://github.com/Giftbit/lightrail-stripe-ruby)
 - [Lightrail Java Client](https://github.com/Giftbit/lightrail-client-java)
 - [Lightrail-Stripe Java Integration](https://github.com/Giftbit/lightrail-stripe-java)
-
-### Gem Terminology
-
-This gem's functionality is available via two interfaces:
-
-- For those who are already familiar with the Lightrail API, this gem uses terminology that matches the API structure and allows you to work with `Lightrail::Code`, `Lightrail::Card`, and `Lightrail::Transaction`. Methods on these classes will return Ruby hashes constructed from the JSON response from the API (see for example the [balance check](#balance-check) code in the following section).
-
-- For those who are already using [Stripe's Ruby gem](https://github.com/stripe/stripe-ruby) and are familiar with that interface, the gem offers an additional 'Stripe-style' interface that wraps the first one using terminology and structures that are similar to what Stripe offers: `Lightrail::LightrailCharge.create`,  `Lightrail::Refund.create`, etc. For more information on communicating with the Stripe API in Ruby, see their [full Stripe API reference](https://stripe.com/docs/api/ruby).
-  This second interface is also consistent with the interface offered by the [Lightrail Java Client](https://github.com/Giftbit/lightrail-client-java). The 'Stripe-style' interface is simply a wrapper for the regular Lightrail interface, and methods such as `Lightrail::LightrailCharge.create` call `Lightrail::Card.charge` under the hood.
-  However, these calls will return class instance objects instead of hashes, with convenience methods and properties that can be accessed with dot notation (for a more detailed example, see the [balance check](#balance-check) code in the following section):
-
-  ```ruby
-  gift_value = Lightrail::LightrailValue.retrieve(<CARD ID>)
-  gift_value.total_available #=> 3500
-  ```
-
-It is assumed that you will choose to use one interface or the other exclusively. Objects created through one interface cannot be used in method calls from the other. Explanations and examples will be provided for the Lightrail interface first, followed by examples using the Stripe-style interface.
-
-*A note on sample code snippets: for reasons of legibility, the output for most calls has been simplified. Attributes of response objects that are not relevant here have been omitted.*
 
 ### Gift Cards
 
@@ -81,39 +64,6 @@ gift_total_balance = Lightrail::Card.get_total_balance("<GIFT CODE>")
 #=>  3500
 ```
 
-*Stripe-style interface:*
-
-Using the `Lightrail::LightrailValue` class, call `.retrieve_by_card` or `.retrieve_by_code`.
-
-```ruby
-gift_balance_details = Lightrail::LightrailValue.retrieve_by_card("<GIFT CARD ID>")
-# or use the fullCode:
-# gift_balance_details = Lightrail::LightrailValue.retrieve_by_code("<GIFT CODE>")
-
-#=>  <Lightrail::LightrailValue:0x007fe24b16f500
-         @principal=
-            {
-            'currentValue' => 3000,
-            'state' => 'ACTIVE',
-            'expires' => nil,
-            'startDate' => nil,
-            'programId' => 'program-123456',
-            'valueStoreId' => 'value-123456'},
-         @attached=[{'currentValue' => 500,
-            'state' => 'ACTIVE',
-            #...},
-          {'currentValue' => 250,
-            'state' => 'EXPIRED',
-            #...}],
-         @currency="USD",
-         @cardType="GIFT_CARD",
-         @balanceDate="2017-05-29T13:37:02.756Z",
-         @cardId="card-123456>
-
-gift_total_value = gift_balance_details.total_available
-#=>  3500
-```
-
 #### Charging a Gift Card
 
 In order to make a charge, you can call `.charge` on either a `Code` or a `Card`. The minimum required parameters are the `fullCode` or `cardId`, the `currency`, and the `value` of the transaction (a negative integer in the smallest currency unit, e.g., 500 cents is 5 USD):
@@ -134,25 +84,6 @@ gift_charge = Lightrail::Code.charge({
     }
 ```
 
-*Stripe-style interface:*
-
-This interface allows you to charge a Lightrail gift card the same way you would a credit card through Stripe, using the same parameter and method names. For example, this means that you can pass in a positive `amount` to charge instead of a negative `value` to apply to the card:
-
-```ruby
-gift_charge = Lightrail::LightrailCharge.create({
-                                      amount: 1850,
-                                      currency: 'USD',
-                                      code: '<GIFT CODE>'
-                                    })
-#=> <Lightrail::LightrailCharge:0x007fdb62206e68
-       @value=-1850,
-       @userSuppliedId="17223eff",
-       @transactionType="DRAWDOWN",
-       @currency="USD",
-       @transactionId="transaction-cd245",
-       #...>
-```
-
 **A note on idempotency:** All calls to create or act on transactions (refund, void, capture) can optionally take a `userSuppliedId` parameter. The `userSuppliedId` is a client-side identifier (unique string) which is used to ensure idempotency (for more details, see the  [API documentation](https://www.lightrail.com/docs/)). If you do not provide a `userSuppliedId`, the gem will create one for you for any calls that require one.
 
 ```ruby
@@ -161,17 +92,6 @@ gift_charge = Lightrail::Code.charge({
                                       currency: 'USD',
                                       code: '<GIFT CODE>',
                                       userSuppliedId: 'order-13jg9s0era9023-u9a-0ea'
-                                    })
-```
-
-*Stripe-style interface:*
-
-```ruby
-gift_charge = Lightrail::LightrailCharge.create({
-                                      amount: 1850,
-                                      currency: 'USD',
-                                      code: '<GIFT CODE>',
-                                        userSuppliedId: 'order-13jg9s0era9023-u9a-0ea'
                                     })
 ```
 
@@ -219,45 +139,7 @@ Lightrail::Transaction.void(gift_charge)
     }
 ```
 
-*Stripe-style interface:*
-
-The Stripe-style interface uses the same terminology that Stripe uses: a pending charge can be created by adding `capture: false` to the param hash when creating a charge. The pending charge object returned from this method call will also have convenience methods to directly `#capture!` or `#cancel!` that charge:
-
-```ruby
-gift_charge = Lightrail::LightrailCharge.create({
-                                      amount: 1850,
-                                      currency: 'USD',
-                                      code: '<GIFT CODE>',
-                                      capture: false,
-                                    })
-//later on
-gift_charge.capture!
-#=> <Lightrail::LightrailCharge:0x007fdb633531d0
-       @value=-1850,
-       @userSuppliedId="17223eff",
-       @dateCreated="2017-05-29T13:37:02.756Z",
-       @transactionType="DRAWDOWN",
-       @transactionAccessMethod="RAWCODE",
-       @cardId="<GIFT CARD ID>",
-       @currency="USD",
-       @transactionId="transaction-cd245",
-       @parentTransactionId="transaction-b9d4444">
-
-//or
-gift_charge.cancel!
-#=> <Lightrail::LightrailCharge:0x007fdb62854018
-       @value=-1850,
-       @userSuppliedId="17223eff",
-       @dateCreated="2017-05-29T13:37:02.756Z",
-       @transactionType="PENDING_VOID",
-       @transactionAccessMethod="RAWCODE",
-       @cardId="<GIFT CARD ID>",
-       @currency="USD",
-       @transactionId="transaction-0ce6f05",
-       @parentTransactionId="transaction-b9d4444">
-```
-
-Note that `#capture!` and `#cancel!` will each return a **new transaction** and will not modify the instance they are called on. These new transactions will have their own `transactionId`. If you need to record the transaction ID of the captured or canceled charge, you can get it from the object returned by these methods (a new instance of `LightrailCharge`).
+Note that `Transaction.void` and `Transaction.capture` will each return a **new transaction** and will not modify the original pending transaction they are called on. These new transactions will have their own `transactionId`. If you need to record the transaction ID of the captured or canceled charge, you can get it from the hash returned by these methods.
 
 #### Refunding a Charge
 
@@ -266,7 +148,7 @@ You can undo a charge by calling `Transaction.refund` and passing in the details
 ```ruby
 gift_charge = Lightrail::Code.charge(<CHARGE PARAMS>)
 
-//later on
+# later on
 Lightrail::Transaction.refund(gift_charge)
 #=> {
        "value"=>1850,
@@ -279,27 +161,6 @@ Lightrail::Transaction.refund(gift_charge)
        "transactionId"=>"transaction-0f2a67",
        "parentTransactionId"=>"transaction-2271e3"
     }
-```
-
-*Stripe-style interface:*
-
-The Stripe-style interface uses the `Lightrail::Refund` class. The return object will be an instance of this class.
-
-```ruby
-gift_charge = Lightrail::LightrailCharge.create(<CHARGE PARAMS>)
-
-//later on
-Lightrail::Refund.create(gift_charge)
-#=> <Lightrail::Refund:0x007fdb62854018
-       @value=1850,
-       @userSuppliedId="873b08ab",
-       @dateCreated="2017-05-29T13:37:02.756Z",
-       @transactionType="DRAWDOWN_REFUND",
-       @transactionAccessMethod="CARDID",
-       @cardId="<GIFT CARD ID>",
-       @currency="USD",
-       @transactionId="transaction-0f2a67",
-       @parentTransactionId="transaction-2271e3">
 ```
 
 Note that this does not necessarily mean that the refunded amount is available for a re-charge. In the edge case where the funds for the original charge came from a promotion which has now expired, refunding will return those funds back to the now-expired value store and therefore the value will not be available for re-charge. To learn more about using value stores for temporary promotions, see the [Lightrail API docs](https://github.com/Giftbit/Lightrail-API-Docs/blob/master/use-cases/promotions.md).
@@ -324,28 +185,6 @@ gift_fund = Lightrail::Card.fund({
        "currency"=>"USD",
        "transactionId"=>"transaction-dee3ee7"
     }
-```
-
-*Stripe-style interface:*
-
-The Stripe-style interface uses the `Lightrail::LightrailFund` class. The return object will be an instance of this class.
-
-```ruby
-gift_fund = Lightrail::LightrailFund.create({
-                                      amount: 500,
-                                      currency: 'USD',
-                                      cardId: '<GIFT CARD ID>',
-                                    })
-
-#=> <Lightrail::LightrailFund:0x007fb7b18b96b8
-       @value=500,
-       @userSuppliedId="4f86a1be",
-       @dateCreated="2017-05-29T13:37:02.756Z",
-       @transactionType="FUND",
-       @transactionAccessMethod="CARDID",
-       @cardId="<GIFT CARD ID>",
-       @currency="USD",
-       @transactionId="transaction-240eca6">
 ```
 
 ## Installation
