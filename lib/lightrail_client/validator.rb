@@ -126,6 +126,16 @@ module Lightrail
       raise Lightrail::LightrailArgumentError.new("Invalid code: #{code.inspect}")
     end
 
+    def self.validate_contact_id! (contact_id)
+      return true if ((contact_id.is_a? String) && ((/\A[A-Z0-9\-]+\z/i =~ contact_id).is_a? Integer))
+      raise Lightrail::LightrailArgumentError.new("Invalid contact_id: #{contact_id.inspect}")
+    end
+
+    def self.validate_shopper_id! (shopper_id)
+      return true if ((shopper_id.is_a? String) && ((/\A[A-Z0-9\-]+\z/i =~ shopper_id).is_a? Integer))
+      raise Lightrail::LightrailArgumentError.new("Invalid shopper_id: #{shopper_id.inspect}")
+    end
+
     def self.validate_transaction_id! (transaction_id)
       return true if ((transaction_id.is_a? String) && !transaction_id.empty?)
       raise Lightrail::LightrailArgumentError.new("Invalid transaction_id: #{transaction_id.inspect}")
@@ -175,13 +185,23 @@ module Lightrail
       cardId && self.validate_card_id!(cardId)
     end
 
+    def self.has_valid_contact_id?(charge_params)
+      contactId = (charge_params.respond_to? :keys) ? self.get_contact_id(charge_params) : false
+      contactId && self.validate_contact_id!(contactId)
+    end
+
+    def self.has_valid_shopper_id?(charge_params)
+      shopperId = (charge_params.respond_to? :keys) ? self.get_shopper_id(charge_params) : false
+      shopperId && self.validate_shopper_id!(shopperId)
+    end
+
     def self.has_valid_transaction_id?(charge_params)
       transactionId = (charge_params.respond_to? :keys) ? self.get_transaction_id(charge_params) : false
       transactionId && self.validate_transaction_id!(transactionId)
     end
 
     def self.has_lightrail_payment_option?(charge_params)
-      (self.has_valid_code?(charge_params) || self.has_valid_card_id?(charge_params))
+      (self.has_valid_code?(charge_params) || self.has_valid_card_id?(charge_params) || self.has_valid_contact_id?(charge_params) || self.has_valid_shopper_id?(charge_params))
     end
 
 
@@ -193,6 +213,16 @@ module Lightrail
     def self.get_code(charge_params)
       code_key = (charge_params.keys & Lightrail::Constants::LIGHTRAIL_CODE_KEYS).first
       charge_params[code_key]
+    end
+
+    def self.get_contact_id(charge_params)
+      contact_id_key = (charge_params.keys & Lightrail::Constants::LIGHTRAIL_CONTACT_ID_KEYS).first
+      charge_params[contact_id_key]
+    end
+
+    def self.get_shopper_id(charge_params)
+      shopper_id_key = (charge_params.keys & Lightrail::Constants::LIGHTRAIL_SHOPPER_ID_KEYS).first
+      charge_params[shopper_id_key]
     end
 
     def self.get_transaction_id(charge_params)

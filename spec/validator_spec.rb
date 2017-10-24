@@ -6,10 +6,10 @@ RSpec.describe Lightrail::Validator do
   let(:lr_argument_error) {Lightrail::LightrailArgumentError}
 
   let(:example_code) {'this-is-a-code'}
-
   let(:example_card_id) {'this-is-a-card-id'}
-
   let(:example_transaction_id) {'this-is-a-transaction-id'}
+  let(:example_contact_id) {'this-is-a-contact-id'}
+  let(:example_shopper_id) {'this-is-a-shopper-id'}
 
   let(:code_charge_params) {{
       amount: 1,
@@ -92,7 +92,6 @@ RSpec.describe Lightrail::Validator do
         expect {validator.validate_ping_response!([])}.to raise_error(lr_argument_error, /ping_response/)
       end
     end
-
   end
 
   describe "single validator methods" do
@@ -107,6 +106,34 @@ RSpec.describe Lightrail::Validator do
         expect {validator.validate_card_id! (123)}.to raise_error(lr_argument_error), "called with integer"
         expect {validator.validate_card_id! ({})}.to raise_error(lr_argument_error), "called with empty hash"
         expect {validator.validate_card_id! ([])}.to raise_error(lr_argument_error), "called with empty array"
+      end
+    end
+
+    describe ".validate_contact_id!" do
+      it "returns true for a string of the right format" do
+        expect(validator.validate_contact_id! (example_contact_id)).to be true
+      end
+
+      it "raises LightrailArgumentError for any other type" do
+        expect {validator.validate_contact_id! ('')}.to raise_error(lr_argument_error), "called with empty string"
+        expect {validator.validate_contact_id! ('some random string')}.to raise_error(lr_argument_error), "called with invalid string"
+        expect {validator.validate_contact_id! (123)}.to raise_error(lr_argument_error), "called with integer"
+        expect {validator.validate_contact_id! ({})}.to raise_error(lr_argument_error), "called with empty hash"
+        expect {validator.validate_contact_id! ([])}.to raise_error(lr_argument_error), "called with empty array"
+      end
+    end
+
+    describe ".validate_shopper_id!" do
+      it "returns true for a string of the right format" do
+        expect(validator.validate_shopper_id! (example_shopper_id)).to be true
+      end
+
+      it "raises LightrailArgumentError for any other type" do
+        expect {validator.validate_shopper_id! ('')}.to raise_error(lr_argument_error), "called with empty string"
+        expect {validator.validate_shopper_id! ('some random string')}.to raise_error(lr_argument_error), "called with invalid string"
+        expect {validator.validate_shopper_id! (123)}.to raise_error(lr_argument_error), "called with integer"
+        expect {validator.validate_shopper_id! ({})}.to raise_error(lr_argument_error), "called with empty hash"
+        expect {validator.validate_shopper_id! ([])}.to raise_error(lr_argument_error), "called with empty array"
       end
     end
 
@@ -177,7 +204,5 @@ RSpec.describe Lightrail::Validator do
         expect {validator.validate_username! ([])}.to raise_error(lr_argument_error), "called with empty array"
       end
     end
-
   end
-
 end

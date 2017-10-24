@@ -15,6 +15,7 @@ require "lightrail_client/ping"
 require "lightrail_client/transaction"
 require "lightrail_client/card"
 require "lightrail_client/code"
+require "lightrail_client/contact"
 
 module Lightrail
   class << self
