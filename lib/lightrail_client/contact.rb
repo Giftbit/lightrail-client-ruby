@@ -2,7 +2,7 @@ module Lightrail
   class Contact < Lightrail::LightrailObject
 
     def self.charge(charge_params)
-      params_with_account_card_id = self.replace_contact_id_with_card_id(charge_params)
+      params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(charge_params)
       Lightrail::Card.charge(params_with_account_card_id)
     end
 
@@ -18,17 +18,16 @@ module Lightrail
       end
     end
 
-    def self.replace_contact_id_with_card_id(charge_params)
-      contact_id = self.get_contact_id_from_id_or_shopper_id(charge_params)
-      account_card_id = self.get_account_card_id_by_contact_id(contact_id, charge_params[:currency])
+    def self.replace_contact_id_or_shopper_id_with_card_id(transaction_params)
+      contact_id = self.get_contact_id_from_id_or_shopper_id(transaction_params)
+      account_card_id = self.get_account_card_id_by_contact_id(contact_id, transaction_params[:currency])
 
-      params_with_card_id = charge_params.clone
+      params_with_card_id = transaction_params.clone
       params_with_card_id[:card_id] = account_card_id
       params_with_card_id.delete(:contact_id)
       params_with_card_id.delete(:shopper_id)
       params_with_card_id
     end
-
 
     def self.get_contact_id_from_id_or_shopper_id(charge_params)
       if Lightrail::Validator.has_valid_contact_id?(charge_params)
