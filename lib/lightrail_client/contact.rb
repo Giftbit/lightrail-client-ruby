@@ -6,6 +6,21 @@ module Lightrail
       Lightrail::Card.charge(params_with_account_card_id)
     end
 
+    def self.fund(fund_params)
+      params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(fund_params)
+      Lightrail::Card.fund(params_with_account_card_id)
+    end
+
+    def self.get_balance_details(balance_check_params)
+      params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(balance_check_params)
+      Lightrail::Card.get_balance_details(params_with_account_card_id[:card_id])
+    end
+
+    def self.get_total_balance(balance_check_params)
+      params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(balance_check_params)
+      Lightrail::Card.get_total_balance(params_with_account_card_id[:card_id])
+    end
+
     private
 
     def self.get_account_card_id_by_contact_id(contact_id, currency)
