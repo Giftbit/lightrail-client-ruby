@@ -201,10 +201,6 @@ module Lightrail
       transactionId && self.validate_transaction_id!(transactionId)
     end
 
-    def self.has_lightrail_payment_option?(charge_params)
-      (self.has_valid_code?(charge_params) || self.has_valid_card_id?(charge_params) || self.has_valid_contact_id?(charge_params) || self.has_valid_shopper_id?(charge_params))
-    end
-
 
     def self.get_card_id(charge_params)
       card_id_key = (charge_params.keys & Lightrail::Constants::LIGHTRAIL_CARD_ID_KEYS).first
