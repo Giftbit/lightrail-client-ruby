@@ -38,7 +38,7 @@ module Lightrail
       account_card_id = self.get_account_card_id_by_contact_id(contact_id, transaction_params[:currency])
 
       params_with_card_id = transaction_params.clone
-      params_with_card_id[:card_id] = account_card_id
+      params_with_card_id[:card_id] = account_card_id if account_card_id
       params_with_card_id.delete(:contact_id)
       params_with_card_id.delete(:shopper_id)
       params_with_card_id

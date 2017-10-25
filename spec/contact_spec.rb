@@ -174,6 +174,47 @@ RSpec.describe Lightrail::Contact do
       end
     end
 
+    describe ".replace_contact_id_or_shopper_id_with_card_id" do
+      it "replaces a contact id with a card id" do
+        expect(lightrail_connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                    .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
+
+        new_params = contact.replace_contact_id_or_shopper_id_with_card_id(charge_params_with_contact_id)
+
+        expect(new_params[:card_id]).to eq(example_card_id)
+        expect(new_params[:contact_id]).to be nil
+      end
+
+      it "replaces a shopper id with a card id" do
+        expect(lightrail_connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/contacts\?userSuppliedId=#{example_shopper_id}/)
+                    .and_return({"contacts" => [{"contactId" => "this-is-a-contact-id"}]})
+        expect(lightrail_connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                    .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
+
+        new_params = contact.replace_contact_id_or_shopper_id_with_card_id(charge_params_with_shopper_id)
+
+        expect(new_params[:card_id]).to eq(example_card_id)
+        expect(new_params[:shopper_id]).to be nil
+      end
+
+      it "does not overwrite an existing card id if there is no contact id or shopper id" do
+        expect(lightrail_connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/cards\?contactId=\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                    .and_return({"cards" => []})
+
+        new_params = contact.replace_contact_id_or_shopper_id_with_card_id({card_id: 'this-is-a-pre-existing-card-id', currency: 'ABC'})
+
+        expect(new_params[:card_id]).to eq('this-is-a-pre-existing-card-id')
+      end
+    end
+
     describe ".get_contact_id_from_id_or_shopper_id" do
       it "gets the ID of the first contact returned" do
         expect(lightrail_connection)
