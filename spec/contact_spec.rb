@@ -163,13 +163,14 @@ RSpec.describe Lightrail::Contact do
         contact.get_account_card_id_by_contact_id(example_contact_id, example_currency)
       end
 
-      it "throws an error if no results" do
+      it "returns nil if no results" do
         expect(lightrail_connection)
             .to receive(:make_get_request_and_parse_response)
                     .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
                     .and_return({"cards" => []})
 
-        expect {contact.get_account_card_id_by_contact_id(example_contact_id, example_currency)}.to raise_error(Lightrail::CouldNotFindObjectError)
+        contact_result = contact.get_account_card_id_by_contact_id(example_contact_id, example_currency)
+        expect(contact_result).to be(nil)
       end
     end
 
@@ -183,13 +184,14 @@ RSpec.describe Lightrail::Contact do
         expect(contact_id).to eq(example_contact_id)
       end
 
-      it "throws an error if no results" do
+      it "returns nil if no results" do
         expect(lightrail_connection)
             .to receive(:make_get_request_and_parse_response)
                     .with(/contacts\?userSuppliedId=not-here/)
                     .and_return({"contacts" => []})
 
-        expect {contact.get_contact_id_from_id_or_shopper_id({shopper_id: 'not-here'})}.to raise_error(Lightrail::CouldNotFindObjectError)
+        contact_id_result = contact.get_contact_id_from_id_or_shopper_id({shopper_id: 'not-here'})
+        expect(contact_id_result).to be(nil)
       end
     end
   end

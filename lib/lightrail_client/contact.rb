@@ -29,7 +29,7 @@ module Lightrail
       if (!card.nil? && !card.empty? && card['cardId'])
         return card['cardId']
       else
-        raise Lightrail::CouldNotFindObjectError.new("Could not find a card for contact_id #{contact_id}")
+        return nil
       end
     end
 
@@ -55,11 +55,11 @@ module Lightrail
         if (!contact.nil? && !contact.empty? && contact['contactId'])
           return contact['contactId']
         else
-          raise Lightrail::CouldNotFindObjectError.new("Could not find a contact for shopper_id #{shopper_id}")
+          return nil
         end
       end
 
-      raise Lightrail::LightrailArgumentError.new("Missing required parameter 'contact_id' or 'shopper_id': #{charge_params.inspect}")
+      return nil
     end
 
   end
