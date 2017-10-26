@@ -6,10 +6,10 @@ RSpec.describe Lightrail::Validator do
   let(:lr_argument_error) {Lightrail::LightrailArgumentError}
 
   let(:example_code) {'this-is-a-code'}
-
   let(:example_card_id) {'this-is-a-card-id'}
-
   let(:example_transaction_id) {'this-is-a-transaction-id'}
+  let(:example_contact_id) {'this-is-a-contact-id'}
+  let(:example_shopper_id) {'this-is-a-shopper-id'}
 
   let(:code_charge_params) {{
       amount: 1,
@@ -23,8 +23,32 @@ RSpec.describe Lightrail::Validator do
       cardId: example_card_id,
   }}
 
+  let(:contact_id_charge_params) {{
+      amount: 1,
+      currency: 'USD',
+      contact_id: example_contact_id,
+  }}
+
+  let(:shopper_id_charge_params) {{
+      amount: 1,
+      currency: 'USD',
+      shopper_id: example_shopper_id,
+  }}
+
   let(:card_id_fund_params) {{
-      cardId: example_card_id,
+      card_id: example_card_id,
+      amount: 20,
+      currency: 'USD',
+  }}
+
+  let(:contact_id_fund_params) {{
+      contact_id: example_contact_id,
+      amount: 20,
+      currency: 'USD',
+  }}
+
+  let(:shopper_id_fund_params) {{
+      shopper_id: example_shopper_id,
       amount: 20,
       currency: 'USD',
   }}
@@ -42,8 +66,34 @@ RSpec.describe Lightrail::Validator do
 
   describe "grouped validator methods" do
     describe ".validate_charge_object!" do
-      it "returns true when the required keys are present" do
+      it "returns true when the required keys are present - charge by code" do
         expect(validator.validate_charge_object!(code_charge_params)).to be true
+      end
+
+      it "returns true when the required keys are present - charge by card" do
+        expect(validator.validate_charge_object!(card_id_charge_params)).to be true
+      end
+
+      it "returns true when the required keys are present - charge by contact" do
+        expect(Lightrail::Connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=USD/)
+                    .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
+
+        expect(validator.validate_charge_object!(contact_id_charge_params)).to be true
+      end
+
+      it "returns true when the required keys are present - charge by shopperId" do
+        expect(Lightrail::Connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/contacts\?userSuppliedId=#{example_shopper_id}/)
+                    .and_return({"contacts" => [{"contactId" => "this-is-a-contact-id"}]})
+        expect(Lightrail::Connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=USD/)
+                    .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
+
+        expect(validator.validate_charge_object!(shopper_id_charge_params)).to be true
       end
 
       it "raises LightrailArgumentError when missing required params" do
@@ -67,8 +117,29 @@ RSpec.describe Lightrail::Validator do
     end
 
     describe ".validate_fund_object!" do
-      it "returns true when the required keys are present & formatted" do
+      it "returns true when the required keys are present & formatted - fund by card" do
         expect(validator.validate_fund_object!(card_id_fund_params)).to be true
+      end
+
+      it "returns true when the required keys are present & formatted - fund by contact" do
+        expect(Lightrail::Connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=USD/)
+                    .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
+
+        expect(validator.validate_fund_object!(contact_id_fund_params)).to be true
+      end
+
+      it "returns true when the required keys are present & formatted - fund by shopperId" do
+        expect(Lightrail::Connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/contacts\?userSuppliedId=#{example_shopper_id}/)
+                    .and_return({"contacts" => [{"contactId" => "this-is-a-contact-id"}]})
+        expect(Lightrail::Connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=USD/)
+                    .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
+        expect(validator.validate_fund_object!(shopper_id_fund_params)).to be true
       end
 
       it "raises LightrailArgumentError when missing required params" do
@@ -92,7 +163,6 @@ RSpec.describe Lightrail::Validator do
         expect {validator.validate_ping_response!([])}.to raise_error(lr_argument_error, /ping_response/)
       end
     end
-
   end
 
   describe "single validator methods" do
@@ -107,6 +177,34 @@ RSpec.describe Lightrail::Validator do
         expect {validator.validate_card_id! (123)}.to raise_error(lr_argument_error), "called with integer"
         expect {validator.validate_card_id! ({})}.to raise_error(lr_argument_error), "called with empty hash"
         expect {validator.validate_card_id! ([])}.to raise_error(lr_argument_error), "called with empty array"
+      end
+    end
+
+    describe ".validate_contact_id!" do
+      it "returns true for a string of the right format" do
+        expect(validator.validate_contact_id! (example_contact_id)).to be true
+      end
+
+      it "raises LightrailArgumentError for any other type" do
+        expect {validator.validate_contact_id! ('')}.to raise_error(lr_argument_error), "called with empty string"
+        expect {validator.validate_contact_id! ('some random string')}.to raise_error(lr_argument_error), "called with invalid string"
+        expect {validator.validate_contact_id! (123)}.to raise_error(lr_argument_error), "called with integer"
+        expect {validator.validate_contact_id! ({})}.to raise_error(lr_argument_error), "called with empty hash"
+        expect {validator.validate_contact_id! ([])}.to raise_error(lr_argument_error), "called with empty array"
+      end
+    end
+
+    describe ".validate_shopper_id!" do
+      it "returns true for a string of the right format" do
+        expect(validator.validate_shopper_id! (example_shopper_id)).to be true
+      end
+
+      it "raises LightrailArgumentError for any other type" do
+        expect {validator.validate_shopper_id! ('')}.to raise_error(lr_argument_error), "called with empty string"
+        expect {validator.validate_shopper_id! ('some random string')}.to raise_error(lr_argument_error), "called with invalid string"
+        expect {validator.validate_shopper_id! (123)}.to raise_error(lr_argument_error), "called with integer"
+        expect {validator.validate_shopper_id! ({})}.to raise_error(lr_argument_error), "called with empty hash"
+        expect {validator.validate_shopper_id! ([])}.to raise_error(lr_argument_error), "called with empty array"
       end
     end
 
@@ -177,7 +275,5 @@ RSpec.describe Lightrail::Validator do
         expect {validator.validate_username! ([])}.to raise_error(lr_argument_error), "called with empty array"
       end
     end
-
   end
-
 end

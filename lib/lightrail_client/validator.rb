@@ -27,7 +27,8 @@ module Lightrail
       validated_params = charge_params.clone
       begin
         return validated_params if ((validated_params.is_a? Hash) &&
-            self.set_cardId!(validated_params, validated_params) &&
+            (self.set_cardId!(validated_params, validated_params) ||
+                Lightrail::Contact.replace_contact_id_or_shopper_id_with_card_id(validated_params)) &&
             self.validate_amount!(validated_params[:amount] || validated_params[:value]) &&
             self.validate_currency!(validated_params[:currency]) &&
             self.get_or_set_userSuppliedId!(validated_params))
@@ -40,7 +41,8 @@ module Lightrail
       validated_params = fund_params.clone
       begin
         return validated_params if ((validated_params.is_a? Hash) &&
-            self.set_cardId!(validated_params, validated_params) &&
+            (self.set_cardId!(validated_params, validated_params) ||
+                Lightrail::Contact.replace_contact_id_or_shopper_id_with_card_id(validated_params)) &&
             self.validate_amount!(validated_params[:amount] || validated_params[:value]) &&
             self.validate_currency!(validated_params[:currency]) &&
             self.get_or_set_userSuppliedId!(validated_params))
@@ -77,7 +79,7 @@ module Lightrail
     def self.validate_charge_object! (charge_params)
       begin
         return true if (self.set_params_for_code_drawdown!(charge_params) if self.has_valid_code?(charge_params)) ||
-            (self.set_params_for_card_id_drawdown!(charge_params) if self.has_valid_card_id?(charge_params))
+            (self.set_params_for_card_id_drawdown!(charge_params) if (self.has_valid_card_id?(charge_params) || self.has_valid_contact_id?(charge_params) || self.has_valid_shopper_id?(charge_params)))
       rescue Lightrail::LightrailArgumentError
       end
       raise Lightrail::LightrailArgumentError.new("Invalid charge_params: #{charge_params.inspect}")
@@ -95,10 +97,8 @@ module Lightrail
 
     def self.validate_fund_object! (fund_params)
       begin
-        return true if ((fund_params.is_a? Hash) &&
-            self.validate_card_id!(fund_params[:cardId]) &&
-            self.validate_amount!(fund_params[:amount]) &&
-            self.validate_currency!(fund_params[:currency]))
+        return true if (self.set_params_for_card_id_fund!(fund_params) if (self.has_valid_card_id?(fund_params) ||
+            self.has_valid_contact_id?(fund_params) || self.has_valid_shopper_id?(fund_params)))
       rescue Lightrail::LightrailArgumentError
       end
       raise Lightrail::LightrailArgumentError.new("Invalid fund_params: #{fund_params.inspect}")
@@ -124,6 +124,16 @@ module Lightrail
     def self.validate_code! (code)
       return true if ((code.is_a? String) && ((/\A[A-Z0-9\-]+\z/i =~ code).is_a? Integer))
       raise Lightrail::LightrailArgumentError.new("Invalid code: #{code.inspect}")
+    end
+
+    def self.validate_contact_id! (contact_id)
+      return true if ((contact_id.is_a? String) && ((/\A[A-Z0-9\-]+\z/i =~ contact_id).is_a? Integer))
+      raise Lightrail::LightrailArgumentError.new("Invalid contact_id: #{contact_id.inspect}")
+    end
+
+    def self.validate_shopper_id! (shopper_id)
+      return true if ((shopper_id.is_a? String) && ((/\A[A-Z0-9\-]+\z/i =~ shopper_id).is_a? Integer))
+      raise Lightrail::LightrailArgumentError.new("Invalid shopper_id: #{shopper_id.inspect}")
     end
 
     def self.validate_transaction_id! (transaction_id)
@@ -175,13 +185,19 @@ module Lightrail
       cardId && self.validate_card_id!(cardId)
     end
 
+    def self.has_valid_contact_id?(charge_params)
+      contactId = (charge_params.respond_to? :keys) ? self.get_contact_id(charge_params) : false
+      contactId && self.validate_contact_id!(contactId)
+    end
+
+    def self.has_valid_shopper_id?(charge_params)
+      shopperId = (charge_params.respond_to? :keys) ? self.get_shopper_id(charge_params) : false
+      shopperId && self.validate_shopper_id!(shopperId)
+    end
+
     def self.has_valid_transaction_id?(charge_params)
       transactionId = (charge_params.respond_to? :keys) ? self.get_transaction_id(charge_params) : false
       transactionId && self.validate_transaction_id!(transactionId)
-    end
-
-    def self.has_lightrail_payment_option?(charge_params)
-      (self.has_valid_code?(charge_params) || self.has_valid_card_id?(charge_params))
     end
 
 
@@ -193,6 +209,16 @@ module Lightrail
     def self.get_code(charge_params)
       code_key = (charge_params.keys & Lightrail::Constants::LIGHTRAIL_CODE_KEYS).first
       charge_params[code_key]
+    end
+
+    def self.get_contact_id(charge_params)
+      contact_id_key = (charge_params.keys & Lightrail::Constants::LIGHTRAIL_CONTACT_ID_KEYS).first
+      charge_params[contact_id_key]
+    end
+
+    def self.get_shopper_id(charge_params)
+      shopper_id_key = (charge_params.keys & Lightrail::Constants::LIGHTRAIL_SHOPPER_ID_KEYS).first
+      charge_params[shopper_id_key]
     end
 
     def self.get_transaction_id(charge_params)
