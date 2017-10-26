@@ -41,7 +41,8 @@ module Lightrail
       validated_params = fund_params.clone
       begin
         return validated_params if ((validated_params.is_a? Hash) &&
-            self.set_cardId!(validated_params, validated_params) &&
+            (self.set_cardId!(validated_params, validated_params) ||
+                Lightrail::Contact.replace_contact_id_or_shopper_id_with_card_id(validated_params)) &&
             self.validate_amount!(validated_params[:amount] || validated_params[:value]) &&
             self.validate_currency!(validated_params[:currency]) &&
             self.get_or_set_userSuppliedId!(validated_params))
@@ -96,10 +97,8 @@ module Lightrail
 
     def self.validate_fund_object! (fund_params)
       begin
-        return true if ((fund_params.is_a? Hash) &&
-            self.validate_card_id!(fund_params[:cardId]) &&
-            self.validate_amount!(fund_params[:amount]) &&
-            self.validate_currency!(fund_params[:currency]))
+        return true if (self.set_params_for_card_id_fund!(fund_params) if (self.has_valid_card_id?(fund_params) ||
+            self.has_valid_contact_id?(fund_params) || self.has_valid_shopper_id?(fund_params)))
       rescue Lightrail::LightrailArgumentError
       end
       raise Lightrail::LightrailArgumentError.new("Invalid fund_params: #{fund_params.inspect}")

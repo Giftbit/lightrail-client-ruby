@@ -36,7 +36,19 @@ RSpec.describe Lightrail::Validator do
   }}
 
   let(:card_id_fund_params) {{
-      cardId: example_card_id,
+      card_id: example_card_id,
+      amount: 20,
+      currency: 'USD',
+  }}
+
+  let(:contact_id_fund_params) {{
+      contact_id: example_contact_id,
+      amount: 20,
+      currency: 'USD',
+  }}
+
+  let(:shopper_id_fund_params) {{
+      shopper_id: example_shopper_id,
       amount: 20,
       currency: 'USD',
   }}
@@ -105,8 +117,29 @@ RSpec.describe Lightrail::Validator do
     end
 
     describe ".validate_fund_object!" do
-      it "returns true when the required keys are present & formatted" do
+      it "returns true when the required keys are present & formatted - fund by card" do
         expect(validator.validate_fund_object!(card_id_fund_params)).to be true
+      end
+
+      it "returns true when the required keys are present & formatted - fund by contact" do
+        expect(Lightrail::Connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=USD/)
+                    .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
+
+        expect(validator.validate_fund_object!(contact_id_fund_params)).to be true
+      end
+
+      it "returns true when the required keys are present & formatted - fund by shopperId" do
+        expect(Lightrail::Connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/contacts\?userSuppliedId=#{example_shopper_id}/)
+                    .and_return({"contacts" => [{"contactId" => "this-is-a-contact-id"}]})
+        expect(Lightrail::Connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=USD/)
+                    .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
+        expect(validator.validate_fund_object!(shopper_id_fund_params)).to be true
       end
 
       it "raises LightrailArgumentError when missing required params" do
