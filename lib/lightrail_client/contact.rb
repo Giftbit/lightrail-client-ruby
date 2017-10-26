@@ -35,7 +35,12 @@ module Lightrail
 
     def self.replace_contact_id_or_shopper_id_with_card_id(transaction_params)
       contact_id = self.get_contact_id_from_id_or_shopper_id(transaction_params)
-      account_card_id = self.get_account_card_id_by_contact_id(contact_id, transaction_params[:currency])
+
+      if contact_id
+        account_card_id = self.get_account_card_id_by_contact_id(contact_id, transaction_params[:currency])
+      elsif !Lightrail::Validator.has_valid_card_id?(transaction_params)
+        raise Lightrail::LightrailArgumentError.new("Method replace_contact_id_or_shopper_id_with_card_id could not find contact - no contact_id or shopper_id in transaction_params: #{transaction_params.inspect}")
+      end
 
       params_with_card_id = transaction_params.clone
       params_with_card_id[:card_id] = account_card_id if account_card_id
