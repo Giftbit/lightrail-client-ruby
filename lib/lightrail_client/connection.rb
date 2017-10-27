@@ -1,11 +1,5 @@
 module Lightrail
   class Connection
-    def self.get_balance_details(by_code_or_card, fullcode_or_card_id)
-      response = by_code_or_card == :code ?
-          self.get_code_balance(fullcode_or_card_id) :
-          self.get_card_id_balance(fullcode_or_card_id)
-      response['balance']
-    end
 
     def self.get_contact_by_id(contact_id)
       response = self.send :make_get_request_and_parse_response, "contacts/#{contact_id}"
@@ -24,14 +18,6 @@ module Lightrail
 
     def self.ping
       self.send :make_get_request_and_parse_response, "ping"
-    end
-
-    def self.get_code_balance(code)
-      self.send :make_get_request_and_parse_response, "codes/#{code}/balance/details"
-    end
-
-    def self.get_card_id_balance(card_id)
-      self.send :make_get_request_and_parse_response, "cards/#{card_id}/balance"
     end
 
 
