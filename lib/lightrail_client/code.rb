@@ -6,7 +6,8 @@ module Lightrail
     end
 
     def self.get_balance_details(code)
-      Lightrail::Connection.get_balance_details(:code, code)
+      response = Lightrail::Connection.make_get_request_and_parse_response("codes/#{code}/balance/details")
+      response['balance']
     end
 
     def self.get_total_balance(code)

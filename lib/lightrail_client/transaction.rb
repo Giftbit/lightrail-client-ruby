@@ -33,13 +33,40 @@ module Lightrail
 
     def self.create(transaction_params, transaction_type)
       transaction_params_for_lightrail = Lightrail::Validator.send("set_params_for_#{transaction_type}!", transaction_params)
-      response = Lightrail::Connection.send(transaction_type, transaction_params_for_lightrail)
+      response = self.post_transaction(transaction_params_for_lightrail)
     end
 
     def self.handle_transaction (original_transaction_info, action, new_request_body={})
       transaction_params_for_lightrail = Lightrail::Validator.set_params_for_acting_on_existing_transaction!(original_transaction_info, new_request_body)
-      response = Lightrail::Connection.send(action, transaction_params_for_lightrail)
+      response = self.act_on_transaction(transaction_params_for_lightrail, action)
     end
+
+    def self.post_transaction(transaction_params)
+      response = {}
+      if (transaction_params[:code])
+        code = transaction_params.delete(:code)
+        response = Lightrail::Connection.send :make_post_request_and_parse_response, "codes/#{code}/transactions", transaction_params
+      elsif (transaction_params[:cardId])
+        card_id = transaction_params.delete(:cardId)
+        response = Lightrail::Connection.send :make_post_request_and_parse_response, "cards/#{card_id}/transactions", transaction_params
+      else
+        raise Lightrail::LightrailArgumentError.new("Lightrail code or cardId required to post a transaction: #{transaction_params.inspect}")
+      end
+      response['transaction']
+    end
+
+    def self.act_on_transaction(transaction_params, action)
+      response = {}
+      if (transaction_params[:cardId])
+        card_id = transaction_params.delete(:cardId)
+        transaction_id = transaction_params.delete(:transactionId)
+        response = Lightrail::Connection.send :make_post_request_and_parse_response, "cards/#{card_id}/transactions/#{transaction_id}/#{action}", transaction_params
+      else
+        raise Lightrail::LightrailArgumentError.new("Lightrail cardId required to act on an existing transaction: #{transaction_params.inspect}")
+      end
+      response['transaction']
+    end
+
 
   end
 end

@@ -10,7 +10,8 @@ module Lightrail
     end
 
     def self.get_balance_details(card_id)
-      Lightrail::Connection.get_balance_details(:cardId, card_id)
+      response = Lightrail::Connection.make_get_request_and_parse_response("cards/#{card_id}/balance")
+      response['balance']
     end
 
     def self.get_total_balance(card_id)
