@@ -38,4 +38,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "faraday", "~>0.12"
   spec.add_runtime_dependency "json", "~>1.7"
   spec.add_runtime_dependency "openssl", "~>2.0"
+  spec.add_runtime_dependency "jwt", "~>2.1"
 end
