@@ -24,7 +24,7 @@ module Lightrail
     private
 
     def self.get_account_card_id_by_contact_id(contact_id, currency)
-      card = Lightrail::Connection.get_account_card_by_contact_id_and_currency(contact_id, currency)
+      card = self.get_account_card_by_contact_id_and_currency(contact_id, currency)
 
       if (!card.nil? && !card.empty? && card['cardId'])
         return card['cardId']
@@ -56,7 +56,7 @@ module Lightrail
 
       if Lightrail::Validator.has_valid_shopper_id?(charge_params)
         shopper_id = Lightrail::Validator.get_shopper_id(charge_params)
-        contact = Lightrail::Connection.get_contact_by_shopper_id(shopper_id)
+        contact = self.get_contact_by_shopper_id(shopper_id)
         if (!contact.nil? && !contact.empty? && contact['contactId'])
           return contact['contactId']
         else
@@ -66,6 +66,22 @@ module Lightrail
 
       return nil
     end
+
+    def self.get_contact_by_id(contact_id)
+      response = Lightrail::Connection.make_get_request_and_parse_response("contacts/#{contact_id}")
+      response['contact']
+    end
+
+    def self.get_contact_by_shopper_id(shopper_id)
+      response = Lightrail::Connection.make_get_request_and_parse_response("contacts?userSuppliedId=#{shopper_id}")
+      response['contacts'][0]
+    end
+
+    def self.get_account_card_by_contact_id_and_currency(contact_id, currency)
+      response = Lightrail::Connection.make_get_request_and_parse_response("cards?contactId=#{contact_id}&cardType=ACCOUNT_CARD&currency=#{currency}")
+      response['cards'][0]
+    end
+
 
   end
 end
