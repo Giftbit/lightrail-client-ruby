@@ -1,17 +1,14 @@
 module Lightrail
   class Connection
-
-    def self.ping
-      self.send :make_get_request_and_parse_response, "ping"
-    end
-
-    private
-
     def self.connection
       conn = Faraday.new Lightrail.api_base, ssl: {version: :TLSv1_2}
       conn.headers['Content-Type'] = 'application/json; charset=utf-8'
       conn.headers['Authorization'] = "Bearer #{Lightrail.api_key}"
       conn
+    end
+
+    def self.ping
+      self.make_get_request_and_parse_response('ping')
     end
 
     def self.make_post_request_and_parse_response (url, body)
@@ -49,6 +46,5 @@ module Lightrail
           raise LightrailError.new("Server responded with: (#{response.status}) #{message}", response)
       end
     end
-
   end
 end
