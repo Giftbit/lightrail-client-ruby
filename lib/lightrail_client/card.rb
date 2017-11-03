@@ -2,7 +2,12 @@ module Lightrail
   class Card < Lightrail::LightrailObject
 
     def self.charge(charge_params)
-      Lightrail::Transaction.charge_card(charge_params)
+      Lightrail::Transaction.charge_card(charge_params, false)
+    end
+
+    def self.simulate_charge(charge_params)
+      params_for_simulation = Lightrail::Validator.set_nsf_for_simulate!(charge_params)
+      Lightrail::Transaction.charge_card(params_for_simulation, true)
     end
 
     def self.fund(fund_params)

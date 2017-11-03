@@ -32,6 +32,18 @@ RSpec.describe Lightrail::Card do
     end
   end
 
+  describe ".simulate_charge" do
+    it "simulates posting a charge to a card" do
+      expect(lightrail_connection).to receive(:make_post_request_and_parse_response).with(/cards\/#{example_card_id}\/transactions\/dryRun/, hash_including(:value, :currency, :userSuppliedId)).and_return({"transaction" => {}})
+      card.simulate_charge(charge_params)
+    end
+
+    it "sets 'nsf' to 'false' by default" do
+      expect(lightrail_connection).to receive(:make_post_request_and_parse_response).with(/cards\/#{example_card_id}\/transactions\/dryRun/, hash_including(nsf: false)).and_return({"transaction" => {}})
+      card.simulate_charge(charge_params)
+    end
+  end
+
   describe ".fund" do
     it "funds a card" do
       expect(lightrail_connection).to receive(:make_post_request_and_parse_response).with(/cards\/#{example_card_id}\/transactions/, hash_including(:value, :currency, :userSuppliedId)).and_return({"transaction" => {}})

@@ -26,6 +26,18 @@ RSpec.describe Lightrail::Code do
     end
   end
 
+  describe ".simulate_charge" do
+    it "simulates posting a charge to a code" do
+      expect(lightrail_connection).to receive(:make_post_request_and_parse_response).with(/codes\/#{example_code}\/transactions\/dryRun/, hash_including(:value, :currency, :userSuppliedId)).and_return({"transaction" => {}})
+      code.simulate_charge(charge_params)
+    end
+
+    it "sets 'nsf' to 'false' by default" do
+      expect(lightrail_connection).to receive(:make_post_request_and_parse_response).with(/codes\/#{example_code}\/transactions\/dryRun/, hash_including(nsf: false)).and_return({"transaction" => {}})
+      code.simulate_charge(charge_params)
+    end
+  end
+
   describe ".get_balance_details" do
     it "gets the balance details by cardId" do
       expect(lightrail_connection).to receive(:make_get_request_and_parse_response).with(/codes\/#{example_code}\/balance/).and_return({"balance" => {}})

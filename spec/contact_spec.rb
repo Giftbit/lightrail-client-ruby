@@ -65,6 +65,40 @@ RSpec.describe Lightrail::Contact do
     end
   end
 
+  describe ".simulate_account_charge" do
+    it "simulates charging a contact's account given a shopperId & currency" do
+      expect(lightrail_connection)
+          .to receive(:make_get_request_and_parse_response)
+                  .with(/contacts\?userSuppliedId=#{example_shopper_id}/)
+                  .and_return({"contacts" => [{"contactId" => "this-is-a-contact-id"}]})
+      expect(lightrail_connection)
+          .to receive(:make_get_request_and_parse_response)
+                  .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                  .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
+      expect(lightrail_connection)
+          .to receive(:make_post_request_and_parse_response)
+                  .with(/cards\/#{example_card_id}\/transactions\/dryRun/, hash_including(:value, :currency))
+                  .and_return({"transaction" => {}})
+      contact.simulate_account_charge(charge_params_with_shopper_id)
+    end
+
+    it "simulates charging a contact's account given a shopperId & currency" do
+      expect(lightrail_connection)
+          .to receive(:make_get_request_and_parse_response)
+                  .with(/contacts\?userSuppliedId=#{example_shopper_id}/)
+                  .and_return({"contacts" => [{"contactId" => "this-is-a-contact-id"}]})
+      expect(lightrail_connection)
+          .to receive(:make_get_request_and_parse_response)
+                  .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                  .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
+      expect(lightrail_connection)
+          .to receive(:make_post_request_and_parse_response)
+                  .with(/cards\/#{example_card_id}\/transactions\/dryRun/, hash_including(:value, :currency))
+                  .and_return({"transaction" => {}})
+      contact.simulate_account_charge(charge_params_with_shopper_id)
+    end
+  end
+
   describe ".fund_account" do
     it "funds a contact's account given a contactId & currency" do
       expect(lightrail_connection)

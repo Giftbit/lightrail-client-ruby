@@ -6,6 +6,11 @@ module Lightrail
       Lightrail::Card.charge(params_with_account_card_id)
     end
 
+    def self.simulate_account_charge(charge_params)
+      params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(charge_params)
+      Lightrail::Card.simulate_charge(params_with_account_card_id)
+    end
+
     def self.fund_account(fund_params)
       params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(fund_params)
       Lightrail::Card.fund(params_with_account_card_id)
