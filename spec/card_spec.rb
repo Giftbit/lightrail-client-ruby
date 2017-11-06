@@ -19,10 +19,12 @@ RSpec.describe Lightrail::Card do
       card_id: example_card_id,
   }}
 
-  let(:balance_response) {{
-      "principal" => {"currentValue" => 400, "state" => "ACTIVE", "programId" => "program-123456", "valueStoreId" => "value-123456"},
-      "attached" => [{"currentValue" => 50, "state" => "ACTIVE", "programId" => "program-789", "valueStoreId" => "value-2468"},
-                     {"currentValue" => 30, "state" => "EXPIRED", "programId" => "program-235", "valueStoreId" => "value-7643"}]
+  let(:details_response) {{
+      "valueStores" => [
+          {"valueStoreType" => "PRINCIPAL", "value" => 675, "state" => "ACTIVE"},
+          {"valueStoreType" => "ATTACHED", "value" => 1250, "state" => "ACTIVE"},
+          {"valueStoreType" => "ATTACHED", "value" => 3175, "state" => "EXPIRED"}
+      ]
   }}
 
   describe ".charge" do
@@ -51,19 +53,18 @@ RSpec.describe Lightrail::Card do
     end
   end
 
-  describe ".get_balance_details" do
-    it "gets the balance details by cardId" do
-      expect(lightrail_connection).to receive(:make_get_request_and_parse_response).with(/cards\/#{example_card_id}\/balance/).and_return({"balance" => {}})
-      card.get_balance_details(example_card_id)
+  describe ".get_details" do
+    it "gets the card details" do
+      expect(lightrail_connection).to receive(:make_get_request_and_parse_response).with(/cards\/#{example_card_id}\/details/).and_return({"details" => {}})
+      card.get_details(example_card_id)
     end
   end
 
-  describe ".get_total_balance" do
-    it "gets the total balance for a card" do
-      expect(card).to receive(:get_balance_details).with(example_card_id).and_return(balance_response)
-      balance = card.get_total_balance(example_card_id)
-      expect(balance).to be 450
+  describe ".get_maximum_value" do
+    it "tallies the value of all active value stores" do
+      expect(lightrail_connection).to receive(:make_get_request_and_parse_response).with(/cards\/#{example_card_id}\/details/).and_return({"details" => details_response})
+      max_val = card.get_maximum_value(example_card_id)
+      expect(max_val).to be 1925
     end
   end
-
 end
