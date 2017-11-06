@@ -15,6 +15,13 @@ RSpec.describe Lightrail::Transaction do
       code: example_code,
   }}
 
+  let(:code_charge_params_with_metadata) {{
+      value: -1,
+      currency: 'USD',
+      code: example_code,
+      metadata: {cart: {items: 5}},
+  }}
+
   let(:card_id_charge_params) {{
       value: -1,
       currency: 'USD',
@@ -32,6 +39,13 @@ RSpec.describe Lightrail::Transaction do
       currency: 'USD',
       card_id: example_card_id,
       pending: true,
+  }}
+
+  let(:card_id_charge_params_with_metadata) {{
+      value: -1,
+      currency: 'USD',
+      card_id: example_card_id,
+      metadata: {cart: {items: 5}},
   }}
 
   let(:transaction_info) {{
@@ -54,6 +68,11 @@ RSpec.describe Lightrail::Transaction do
       it "calls the dry run endpoint if 'simulate=true'" do
         expect(lightrail_connection).to receive(:make_post_request_and_parse_response).with(/codes\/#{example_code}\/transactions\/dryRun/, hash_including(:value, :currency, :userSuppliedId)).and_return({"transaction" => {}})
         transaction.charge_code(code_charge_params, true)
+      end
+
+      it "passes metadata to the API if provided" do
+        expect(lightrail_connection).to receive(:make_post_request_and_parse_response).with(/codes\/#{example_code}\/transactions/, hash_including(:value, :currency, :userSuppliedId, :metadata)).and_return({"transaction" => {}})
+        transaction.charge_code(code_charge_params_with_metadata, false)
       end
 
       it "charges a code first if both code and cardId are present" do
@@ -86,6 +105,11 @@ RSpec.describe Lightrail::Transaction do
       end
     end
 
+    it "calls the dry run endpoint if 'simulate=true'" do
+      expect(lightrail_connection).to receive(:make_post_request_and_parse_response).with(/cards\/#{example_card_id}\/transactions/, hash_including(:value, :currency, :userSuppliedId, :metadata)).and_return({"transaction" => {}})
+      transaction.charge_card(card_id_charge_params_with_metadata, false)
+    end
+
     context "when posting a pending transaction" do
       it "posts a pending transaction to a card_id" do
         card_id_charge_params[:pending] = true
@@ -93,7 +117,6 @@ RSpec.describe Lightrail::Transaction do
         transaction.charge_card(card_id_charge_params, false)
       end
     end
-
   end
 
   describe ".fund_card" do
