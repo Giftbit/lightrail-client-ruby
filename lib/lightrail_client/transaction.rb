@@ -2,18 +2,18 @@ module Lightrail
   class Transaction < Lightrail::LightrailObject
     attr_accessor :transactionId, :value, :userSuppliedId, :dateCreated, :transactionType, :transactionAccessMethod, :giftbitUserId, :cardId, :currency, :codeLastFour, :metadata, :parentTransactionId
 
-    def self.charge_code(transaction_params)
+    def self.charge_code(transaction_params, simulate)
       transaction_type = transaction_params[:pending] ? :code_pending : :code_drawdown
-      self.create(transaction_params, transaction_type)
+      self.create(transaction_params, transaction_type, simulate)
     end
 
-    def self.charge_card(transaction_params)
+    def self.charge_card(transaction_params, simulate)
       transaction_type = transaction_params[:pending] ? :card_id_pending : :card_id_drawdown
-      self.create(transaction_params, transaction_type)
+      self.create(transaction_params, transaction_type, simulate)
     end
 
     def self.fund_card(transaction_params)
-      self.create(transaction_params, :card_id_fund)
+      self.create(transaction_params, :card_id_fund, false)
     end
 
 
@@ -31,9 +31,14 @@ module Lightrail
 
     private
 
-    def self.create(transaction_params, transaction_type)
+    # def self.simulate(transaction_params, transaction_type)
+    #   transaction_params_for_lightrail = Lightrail::Validator.send("set_params_for_#{transaction_type}!", transaction_params)
+    #   response = self.post_transaction(transaction_params_for_lightrail, true)
+    # end
+
+    def self.create(transaction_params, transaction_type, simulate)
       transaction_params_for_lightrail = Lightrail::Validator.send("set_params_for_#{transaction_type}!", transaction_params)
-      response = self.post_transaction(transaction_params_for_lightrail)
+      response = self.post_transaction(transaction_params_for_lightrail, simulate)
     end
 
     def self.handle_transaction (original_transaction_info, action, new_request_body={})
@@ -41,14 +46,15 @@ module Lightrail
       response = self.act_on_transaction(transaction_params_for_lightrail, action)
     end
 
-    def self.post_transaction(transaction_params)
+    def self.post_transaction(transaction_params, simulate)
+      dry_run = simulate ? '/dryRun' : ''
       response = {}
       if (transaction_params[:code])
         code = transaction_params.delete(:code)
-        response = Lightrail::Connection.send :make_post_request_and_parse_response, "codes/#{code}/transactions", transaction_params
+        response = Lightrail::Connection.send :make_post_request_and_parse_response, "codes/#{code}/transactions#{dry_run}", transaction_params
       elsif (transaction_params[:cardId])
         card_id = transaction_params.delete(:cardId)
-        response = Lightrail::Connection.send :make_post_request_and_parse_response, "cards/#{card_id}/transactions", transaction_params
+        response = Lightrail::Connection.send :make_post_request_and_parse_response, "cards/#{card_id}/transactions#{dry_run}", transaction_params
       else
         raise Lightrail::LightrailArgumentError.new("Lightrail code or cardId required to post a transaction: #{transaction_params.inspect}")
       end
@@ -66,7 +72,6 @@ module Lightrail
       end
       response['transaction']
     end
-
 
   end
 end

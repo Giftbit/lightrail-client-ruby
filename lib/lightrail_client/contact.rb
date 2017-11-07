@@ -6,19 +6,24 @@ module Lightrail
       Lightrail::Card.charge(params_with_account_card_id)
     end
 
+    def self.simulate_account_charge(charge_params)
+      params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(charge_params)
+      Lightrail::Card.simulate_charge(params_with_account_card_id)
+    end
+
     def self.fund_account(fund_params)
       params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(fund_params)
       Lightrail::Card.fund(params_with_account_card_id)
     end
 
-    def self.get_account_balance_details(balance_check_params)
-      params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(balance_check_params)
-      Lightrail::Card.get_balance_details(params_with_account_card_id[:card_id])
+    def self.get_account_details(account_details_params)
+      params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(account_details_params)
+      Lightrail::Card.get_details(params_with_account_card_id[:card_id])
     end
 
-    def self.get_account_total_balance(balance_check_params)
-      params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(balance_check_params)
-      Lightrail::Card.get_total_balance(params_with_account_card_id[:card_id])
+    def self.get_maximum_account_value(max_account_value_params)
+      params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(max_account_value_params)
+      Lightrail::Card.get_maximum_value(params_with_account_card_id[:card_id])
     end
 
     private

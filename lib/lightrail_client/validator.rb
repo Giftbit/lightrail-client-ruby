@@ -51,6 +51,14 @@ module Lightrail
       raise Lightrail::LightrailArgumentError.new("Invalid fund_params for set_params_for_card_id_fund!: #{fund_params.inspect}")
     end
 
+    def self.set_nsf_for_simulate!(charge_params)
+      params_for_simulate = charge_params.clone
+      if (!params_for_simulate.key?([:nsf]) && !params_for_simulate.key?(['nsf']))
+        params_for_simulate[:nsf] = false
+      end
+      params_for_simulate
+    end
+
     def self.set_params_for_card_id_pending!(charge_params)
       begin
         validated_params = self.set_params_for_card_id_drawdown!(charge_params)

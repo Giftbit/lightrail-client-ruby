@@ -33,37 +33,111 @@ A Lightrail gift card is a virtual device for issuing gift values. Each gift car
 
 #### Balance Check
 
-You can check the balance of a gift card or code using either the `Card` class or the `Code` class: call `.get_balance_details` or `.get_total_balance` on either one, passing in the `cardId` or `fullCode` (respectively) as a parameter:
+There are several ways to check the balance of a gift card or code. Because you can attach conditional value to a card/code (for example, "get $5 off when you buy a red hat"), the available balance can vary depending on the transaction context.
+
+##### Maximum Value
+
+To get the maximum value of a card/code, i.e. the sum of all active value stores, call either `Card.get_maximum_value(<CARD ID>)` or `Code.get_maximum_value(<CODE>)`. This method will return an integer which represents the sum of all active value stores in the smalled currency unit (e.g. cents):
 
 ```ruby
-gift_balance_details = Lightrail::Code.get_balance_details("<GIFT CODE>")
-# or use the cardId:
-# gift_balance_details = Lightrail::Card.get_balance_details("<GIFT CARD ID>")
+maximum_gift_value = Lightrail::Card.get_maximum_value("<GIFT CARD ID>")
+# or use the code:
+# maximum_gift_value = Lightrail::Code.get_maximum_value("<GIFT CODE>")
 
-#=>  {'principal' => {
-            'currentValue' => 3000,
-            'state' => 'ACTIVE',
-            'expires' => nil,
-            'startDate' => nil,
-            'programId' => 'program-123456',
-            'valueStoreId' => 'value-123456'
-          },
-		'attached' => [
-          {'currentValue' => 500,
-            'state' => 'ACTIVE',
-            #...},
-          {'currentValue' => 250,
-            'state' => 'EXPIRED',
-            #...}
-          ],
-		'currency' => 'USD',
-		'cardType' => 'GIFT_CARD',
-		'balanceDate' => '2017-05-29T13:37:02.756Z',
-		'cardId' => 'card-123456'}
-
-gift_total_balance = Lightrail::Card.get_total_balance("<GIFT CODE>")
 #=>  3500
 ```
+
+##### Card/Code Details
+
+If you would like to see a breakdown of how the value is stored on a card or code you can use the `.get_details` method. This will return a breakdown of all attached value stores, along with other important information:
+
+```ruby
+gift_details = Lightrail::Card.get_details("<GIFT CARD ID>")
+# or use the code:
+# gift_details = Lightrail::Code.get_details("<GIFT CODE>")
+
+#=> {
+        "valueStores": [
+            {
+                "valueStoreType": "PRINCIPAL",
+                "value": 483,
+                "state": "ACTIVE",
+                "expires": null,
+                "startDate": null,
+                "programId": "program-123456",
+                "valueStoreId": "value-11111111",
+                "restrictions": []
+            },
+            {
+                "valueStoreType": "ATTACHED",
+                "value": 1234,
+                "state": "ACTIVE",
+                "expires": "2017-11-13T19:29:31.613Z",
+                "startDate": null,
+                "programId": "program-7890",
+                "valueStoreId": "value-2222222",
+                "restrictions": ["Valid for purchase of a red hat"]
+            },
+            {
+                "valueStoreType": "ATTACHED",
+                "value": 500,
+                "state": "EXPIRED",
+                "expires": "2017-09-13T19:29:37.464Z",
+                "startDate": null,
+                "programId": "program-24680",
+                "valueStoreId": "value-3333333",
+                "restrictions": ["Cart must have five or more items"]
+            }
+        ],
+        "currency": "USD",
+        "cardType": "GIFT_CARD",
+        "asAtDate": "2017-11-06T19:29:41.533Z",
+        "cardId": "card-12q4wresdgf6ey",
+        "codeLastFour": "WXYZ"
+    }
+}
+```
+
+These details can be useful for showing a customer a summary of their gift balance, or for incentivizing further spending (e.g. "Add a red hat to your order to get $12.34 off").
+
+##### Simulate Transaction
+
+If you would like to know how much is available for a specific transaction, use the `.simulate_charge` method. Simply pass in all the same parameters as you would to make a regular charge (see below) **including metadata** so that the Lightrail engine can assess whether necessary conditions are met for any attached value. 
+
+The `value` of the response will indicate the maximum amount that can be charged given the context of the transaction, which can be useful when presenting your customer with a confirmation dialogue. The `value` is a drawdown amount and will therefore be negative:
+
+```ruby
+simulated_charge = Lightrail::Card.simulate_charge({
+                                      value: -1850,
+                                      currency: 'USD',
+                                      card_id: '<GIFT CARD ID>',
+                                      metadata: {cart: {items_total: 5}},
+                                    })
+#=> {
+       "value"=>-1550,
+       "userSuppliedId"=>"2bfb5ccb",
+       "transactionType"=>"DRAWDOWN",
+       "currency"=>"USD",
+       "transactionBreakdown": [
+            {
+                "value": -1234,
+                "valueAvailableAfterTransaction": 0,
+                "valueStoreId": "value-4f9a362e7206445796d934727e0d2b27"
+            },
+            {
+                "value": -616,
+                "valueAvailableAfterTransaction": 0,
+                "valueStoreId": "value-9850b36634b541f5bc6fd280b0198b3d",
+                "restrictions": ["Cart must have five or more items"],
+            }
+         ],
+       "transactionId": null,
+       "dateCreated": null,
+       #...
+    }
+```
+
+Note that because this is a simulated transaction and not a real transaction, the `transactionId` and `dateCreated` will both be `null`.
 
 #### Charging a Gift Card
 
@@ -71,7 +145,7 @@ In order to make a charge, you can call `.charge` on either a `Code` or a `Card`
 
 ```ruby
 gift_charge = Lightrail::Code.charge({
-                                      value: -1850,
+                                      value: -2500,
                                       currency: 'USD',
                                       code: '<GIFT CODE>'
                                     })
@@ -80,7 +154,6 @@ gift_charge = Lightrail::Code.charge({
        "userSuppliedId"=>"2bfb5ccb",
        "transactionType"=>"DRAWDOWN",
        "currency"=>"USD",
-       "transactionId"=>"transaction-8483d9",
        #...
     }
 ```
@@ -196,21 +269,98 @@ You can interact with Customer Accounts through the `Lightrail::Contact` class. 
 
 #### Account Balance Check
 
-Call `Lightrail::Contact.get_balance_details` or `Lightrail::Contact.get_total_balance` to get detailed account balance information or a condensed total of all available value for an account.
+All of the same methods for checking the balance of a customer's account are available as for checking the balance of a gift card or code. **Note however that the account balance check methods require different parameters than their Gift Card counterparts:** since a single contact can have several accounts in different currencies, it is necessary to specify the account currency in a hash along with the contact identifier.
 
-**Note that the balance check methods require different parameters than their Gift Card counterparts:** since a single contact can have several accounts in different currencies, it is necessary to specify the account currency in a hash along with the contact identifier when performing a balance check:
+##### Maximum Value
+
+Accounts can have attached promotions that add value to the account, subject to certain conditions. Call `Lightrail::Contact.get_maximum_account_value` to get the maximum possible balance, i.e. the sum of all attached value stores that are active:
 
 ```ruby
-account_balance_details = Lightrail::Contact.get_balance_details({
+account_maximum_value = Lightrail::Contact.get_maximum_account_value({
     contact_id: '<CONTACT ID>',     # or instead of contact_id: shopper_id: '<SHOPPER ID>'
     currency: 'USD'
   })
 
-total_available_account_balance = Lightrail::Contact.get_total_balance({
+#=> 3550
+```
+
+##### Account Details
+
+Use the `.get_account_details` method to see a breakdown of how account value is stored, along with other important information:
+
+```ruby
+account_maximum_value = Lightrail::Contact.get_account_details({
     contact_id: '<CONTACT ID>',     # or instead of contact_id: shopper_id: '<SHOPPER ID>'
     currency: 'USD'
   })
+
+#=> {
+        "valueStores": [
+            {
+                "valueStoreType": "PRINCIPAL",
+                "value": 483,
+                "state": "ACTIVE",
+                "programId": "program-123456",
+                "valueStoreId": "value-11111111",
+                "restrictions": []
+            },
+            {
+                "valueStoreType": "ATTACHED",
+                "value": 500,
+                "state": "EXPIRED",
+                "expires": "2017-09-13T19:29:37.464Z",
+                "programId": "program-24680",
+                "valueStoreId": "value-3333333",
+                "restrictions": ["Cart must have five or more items"]
+            }
+        ],
+        "currency": "USD",
+        "cardType": "ACCOUNT_CARD",
+        "asAtDate": "2017-11-06T19:29:41.533Z",
+        "cardId": "card-12q4wresdgf6ey",
+        "codeLastFour": "WXYZ"
+    }
+}
 ```
+
+##### Simulate Transaction
+
+Use the `.simulate_account_charge` method to see how much is available for a specific transaction. Simply pass in all the same parameters as you would to make a regular charge (see below) **including metadata** so that the Lightrail engine can assess whether necessary conditions are met for any attached value.
+
+The `value` of the response will indicate the maximum amount that can be charged given the context of the transaction, which can be useful when presenting your customer with a confirmation dialogue. The `value`  is a drawdown amount and will therefore be negative:
+
+```ruby
+simulated_charge = Lightrail::Contact.simulate_charge({
+                                      value: -1850,
+                                      currency: 'USD',
+                                      contact_id: '<CONTACT ID>',
+                                      metadata: {cart: {items_total: 5}},
+                                    })
+#=> {
+       "value"=>-1550,
+       "userSuppliedId"=>"2bfb5ccb",
+       "transactionType"=>"DRAWDOWN",
+       "currency"=>"USD",
+       "transactionBreakdown": [
+            {
+                "value": -1234,
+                "valueAvailableAfterTransaction": 0,
+                "valueStoreId": "value-4f9a362e7206445796d934727e0d2b27"
+            },
+            {
+                "value": -616,
+                "valueAvailableAfterTransaction": 0,
+                "valueStoreId": "value-9850b36634b541f5bc6fd280b0198b3d",
+                "restrictions": ["Cart must have five or more items"],
+            }
+         ],
+       "transactionId": null,
+       "dateCreated": null,
+       #...
+    }
+```
+
+Note that because this is a simulated transaction and not a real transaction, the `transactionId` and `dateCreated` will both be `null`.
 
 #### Charging and Funding and Account
 

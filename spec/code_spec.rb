@@ -13,10 +13,12 @@ RSpec.describe Lightrail::Code do
       code: example_code,
   }}
 
-  let(:balance_response) {{
-      "principal" => {"currentValue" => 400, "state" => "ACTIVE", "programId" => "program-123456", "valueStoreId" => "value-123456"},
-      "attached" => [{"currentValue" => 50, "state" => "ACTIVE", "programId" => "program-789", "valueStoreId" => "value-2468"},
-                     {"currentValue" => 30, "state" => "EXPIRED", "programId" => "program-235", "valueStoreId" => "value-7643"}]
+  let(:details_response) {{
+      "valueStores" => [
+          {"valueStoreType" => "PRINCIPAL", "value" => 675, "state" => "ACTIVE"},
+          {"valueStoreType" => "ATTACHED", "value" => 1250, "state" => "ACTIVE"},
+          {"valueStoreType" => "ATTACHED", "value" => 3175, "state" => "EXPIRED"}
+      ]
   }}
 
   describe ".charge" do
@@ -26,18 +28,30 @@ RSpec.describe Lightrail::Code do
     end
   end
 
-  describe ".get_balance_details" do
-    it "gets the balance details by cardId" do
-      expect(lightrail_connection).to receive(:make_get_request_and_parse_response).with(/codes\/#{example_code}\/balance/).and_return({"balance" => {}})
-      code.get_balance_details(example_code)
+  describe ".simulate_charge" do
+    it "simulates posting a charge to a code" do
+      expect(lightrail_connection).to receive(:make_post_request_and_parse_response).with(/codes\/#{example_code}\/transactions\/dryRun/, hash_including(:value, :currency, :userSuppliedId)).and_return({"transaction" => {}})
+      code.simulate_charge(charge_params)
+    end
+
+    it "sets 'nsf' to 'false' by default" do
+      expect(lightrail_connection).to receive(:make_post_request_and_parse_response).with(/codes\/#{example_code}\/transactions\/dryRun/, hash_including(nsf: false)).and_return({"transaction" => {}})
+      code.simulate_charge(charge_params)
     end
   end
 
-  describe ".get_total_balance" do
-    it "gets the total balance for a code" do
-      expect(code).to receive(:get_balance_details).with(example_code).and_return(balance_response)
-      balance = code.get_total_balance(example_code)
-      expect(balance).to be 450
+  describe ".get_details" do
+    it "gets the code details" do
+      expect(lightrail_connection).to receive(:make_get_request_and_parse_response).with(/codes\/#{example_code}\/details/).and_return({"details" => {}})
+      code.get_details(example_code)
+    end
+  end
+
+  describe ".get_maximum_value" do
+    it "tallies the value of all active value stores" do
+      expect(lightrail_connection).to receive(:make_get_request_and_parse_response).with(/codes\/#{example_code}\/details/).and_return({"details" => details_response})
+      max_val = code.get_maximum_value(example_code)
+      expect(max_val).to be 1925
     end
   end
 
