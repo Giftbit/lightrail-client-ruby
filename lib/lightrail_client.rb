@@ -22,7 +22,7 @@ require "lightrail_client/contact"
 
 module Lightrail
   class << self
-    attr_accessor :api_base, :api_key, :client_secret
+    attr_accessor :api_base, :api_key, :shared_secret
   end
   @api_base = 'https://api.lightrail.com/v1'
 end
