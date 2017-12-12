@@ -3,9 +3,11 @@ require "spec_helper"
 RSpec.describe Lightrail::TokenFactory do
   subject(:factory) {Lightrail::TokenFactory}
 
-  let(:example_api_key) {'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJnIjp7Imd1aSI6InVzZXItZWI2NDYwYWZhNWIwNDQxYmFjYmI0MTI5MGZhZjAxNDctVEVTVCIsImdtaSI6InVzZXItZWI2NDYwYWZhNWIwNDQxYmFjYmI0MTI5MGZhZjAxNDctVEVTVCJ9LCJpYXQiOiIyMDE3LTA3LTA1VDIxOjM4OjQ5LjEzMSswMDAwIiwibmFtZSI6IkpvaG4gRG9lIn0.bhMlwrU4ZoMNRQB47-Twx2Eev7LpBG4d4Sc6Gmxq0oo'}
+  let(:example_api_key) {'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJnIjp7Imd1aSI6Imdvb2V5IiwiZ21pIjoiZ2VybWllIn19.XxOjDsluAw5_hdf5scrLk0UBn8VlhT-3zf5ZeIkEld8'}
   let(:example_shared_secret) {'secret'}
   let(:example_shopper_id) {'this-is-a-shopper-id'}
+  let(:example_contact_id) {'this-is-a-contact-id'}
+  let(:example_user_supplied_id) {'this-is-a-user-supplied-id'}
 
 
   describe ".generate" do
@@ -15,17 +17,41 @@ RSpec.describe Lightrail::TokenFactory do
     end
 
     it "generates a JWT with the supplied shopper_id" do
-      token = factory.generate(example_shopper_id)
+      token = factory.generate({shopper_id: example_shopper_id})
+      decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
+      expect(decoded[0][0]['data']['g']['shi']).to eq(example_shopper_id)
+    end
+
+    it "generates a JWT with the supplied contact_id" do
+      token = factory.generate({contact_id: example_contact_id})
+      decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
+      expect(decoded[0][0]['data']['g']['coi']).to eq(example_contact_id)
+    end
+
+    it "generates a JWT with the supplied contact user_supplied_id" do
+      token = factory.generate({user_supplied_id: example_user_supplied_id})
       decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
 
-      expect(decoded[0][0]['data']['shopperId']).to eq(example_shopper_id)
+      expect(decoded[0][0]['data']['g']['cui']).to eq(example_user_supplied_id)
     end
 
     it "correctly applies the specified validity period" do
-      token = factory.generate(example_shopper_id, 12)
+      token = factory.generate({shopper_id: example_shopper_id}, 12)
       decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
 
       expect(decoded[0][0]['data']['exp']).to eq(decoded[0][0]['data']['iat'] + 12)
+    end
+
+    it "includes 'iat'" do
+      token = factory.generate({shopper_id: example_shopper_id})
+      decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
+      expect(decoded[0][0]['data']['iat']).to be_a(Integer)
+    end
+
+    it "includes 'iss: MERCHANT'" do
+      token = factory.generate({shopper_id: example_shopper_id})
+      decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
+      expect(decoded[0][0]['data']['iss']).to eq("MERCHANT")
     end
   end
 end

@@ -203,6 +203,11 @@ module Lightrail
       shopperId && self.validate_shopper_id!(shopperId)
     end
 
+    def self.has_valid_user_supplied_id?(charge_params)
+      userSuppliedId = (charge_params.respond_to? :keys) ? self.get_user_supplied_id(charge_params) : false
+      userSuppliedId && self.validate_shopper_id!(userSuppliedId) # A contact's userSuppliedId is the same as their shopperId
+    end
+
     def self.has_valid_transaction_id?(charge_params)
       transactionId = (charge_params.respond_to? :keys) ? self.get_transaction_id(charge_params) : false
       transactionId && self.validate_transaction_id!(transactionId)
@@ -236,6 +241,11 @@ module Lightrail
 
     def self.get_code_or_card_id_key(charge_params)
       (charge_params.keys & Lightrail::Constants::LIGHTRAIL_PAYMENT_METHODS).first
+    end
+
+    def self.get_user_supplied_id(charge_params)
+      user_supplied_id_key = (charge_params.keys & Lightrail::Constants::LIGHTRAIL_USER_SUPPLIED_ID_KEYS).first
+      charge_params[user_supplied_id_key]
     end
 
     def self.get_or_create_user_supplied_id(charge_params)
