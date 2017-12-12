@@ -1,7 +1,7 @@
 require "spec_helper"
 
-RSpec.describe Lightrail::TokenFactory do
-  subject(:factory) {Lightrail::TokenFactory}
+RSpec.describe Lightrail::ShopperTokenFactory do
+  subject(:factory) {Lightrail::ShopperTokenFactory}
 
   let(:example_api_key) {'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJnIjp7Imd1aSI6Imdvb2V5IiwiZ21pIjoiZ2VybWllIn19.XxOjDsluAw5_hdf5scrLk0UBn8VlhT-3zf5ZeIkEld8'}
   let(:example_shared_secret) {'secret'}

@@ -11,7 +11,7 @@ require "lightrail_client/constants"
 require "lightrail_client/errors"
 require "lightrail_client/validator"
 require "lightrail_client/connection"
-require "lightrail_client/token_factory"
+require "lightrail_client/shopper_token_factory"
 
 require "lightrail_client/lightrail_object"
 require "lightrail_client/ping"

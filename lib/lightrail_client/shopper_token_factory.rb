@@ -1,5 +1,5 @@
 module Lightrail
-  class TokenFactory
+  class ShopperTokenFactory
     def self.generate (contact, validity_in_seconds=nil)
       raise Lightrail::BadParameterError.new("Lightrail::api_key is not set") unless Lightrail::api_key
       raise Lightrail::BadParameterError.new("Lightrail::shared_secret is not set") unless Lightrail::shared_secret
