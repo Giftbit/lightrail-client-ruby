@@ -144,6 +144,11 @@ module Lightrail
       raise Lightrail::LightrailArgumentError.new("Invalid shopper_id: #{shopper_id.inspect}")
     end
 
+    def self.validate_user_supplied_id! (user_supplied_id)
+      return true if (user_supplied_id.is_a? String)
+      raise Lightrail::LightrailArgumentError.new("Invalid user_supplied_id (must be a String): #{user_supplied_id.inspect} ")
+    end
+
     def self.validate_transaction_id! (transaction_id)
       return true if ((transaction_id.is_a? String) && !transaction_id.empty?)
       raise Lightrail::LightrailArgumentError.new("Invalid transaction_id: #{transaction_id.inspect}")
@@ -203,9 +208,9 @@ module Lightrail
       shopperId && self.validate_shopper_id!(shopperId)
     end
 
-    def self.has_valid_user_supplied_id?(charge_params)
-      userSuppliedId = (charge_params.respond_to? :keys) ? self.get_user_supplied_id(charge_params) : false
-      userSuppliedId && self.validate_shopper_id!(userSuppliedId) # A contact's userSuppliedId is the same as their shopperId
+    def self.has_valid_user_supplied_id?(params)
+      userSuppliedId = (params.respond_to? :keys) ? self.get_user_supplied_id(params) : false
+      userSuppliedId && self.validate_user_supplied_id!(userSuppliedId)
     end
 
     def self.has_valid_transaction_id?(charge_params)
@@ -243,9 +248,9 @@ module Lightrail
       (charge_params.keys & Lightrail::Constants::LIGHTRAIL_PAYMENT_METHODS).first
     end
 
-    def self.get_user_supplied_id(charge_params)
-      user_supplied_id_key = (charge_params.keys & Lightrail::Constants::LIGHTRAIL_USER_SUPPLIED_ID_KEYS).first
-      charge_params[user_supplied_id_key]
+    def self.get_user_supplied_id(params)
+      user_supplied_id_key = (params.keys & Lightrail::Constants::LIGHTRAIL_USER_SUPPLIED_ID_KEYS).first
+      params[user_supplied_id_key]
     end
 
     def self.get_or_create_user_supplied_id(charge_params)
