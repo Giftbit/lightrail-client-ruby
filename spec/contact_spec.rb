@@ -85,6 +85,26 @@ RSpec.describe Lightrail::Contact do
     end
   end
 
+  describe ".retrieve_by_shopper_id" do
+    it "retrieves a contact by its shopperId (contact userSuppliedId)" do
+      expect(lightrail_connection)
+          .to receive(:make_get_request_and_parse_response)
+                  .with(/contacts\?userSuppliedId=#{example_shopper_id}/)
+                  .and_return({"contacts" => []})
+      contact.retrieve_by_shopper_id(example_shopper_id)
+    end
+  end
+
+  describe ".retrieve_by_contact_id" do
+    it "retrieves a contact by its contactId" do
+      expect(lightrail_connection)
+          .to receive(:make_get_request_and_parse_response)
+                  .with(/contacts\/#{example_contact_id}/)
+                  .and_return({"contact" => {}})
+      contact.retrieve_by_contact_id(example_contact_id)
+    end
+  end
+
   describe ".charge_account" do
     it "charges a contact's account given a contactId & currency" do
       expect(lightrail_connection)

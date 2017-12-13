@@ -8,6 +8,16 @@ module Lightrail
       response['contact']
     end
 
+    def self.retrieve_by_shopper_id(shopper_id)
+      response = Lightrail::Connection.send :make_get_request_and_parse_response, "contacts?userSuppliedId=#{CGI::escape(shopper_id)}"
+      response['contacts'][0]
+    end
+
+    def self.retrieve_by_contact_id(contact_id)
+      response = Lightrail::Connection.send :make_get_request_and_parse_response, "contacts/#{CGI::escape(contact_id)}"
+      response['contact']
+    end
+
     def self.charge_account(charge_params)
       params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(charge_params)
       Lightrail::Card.charge(params_with_account_card_id)
