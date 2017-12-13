@@ -18,6 +18,12 @@ module Lightrail
       response['contact']
     end
 
+    def self.create_account(account_params)
+      validated_params = Lightrail::Validator.set_params_for_account_create!(account_params)
+      response = Lightrail::Connection.send :make_post_request_and_parse_response, "cards", validated_params
+      response['card']
+    end
+
     def self.charge_account(charge_params)
       params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(charge_params)
       Lightrail::Card.charge(params_with_account_card_id)
@@ -61,6 +67,11 @@ module Lightrail
       params_with_card_id
     end
 
+    def self.get_contact_id_from_shopper_id(shopper_id)
+      contact = self.retrieve_by_shopper_id(shopper_id)
+      contact['contactId']
+    end
+
     def self.set_user_supplied_id_for_contact_create(create_params)
       params_with_user_supplied_id = create_params.clone
       shopper_id = Lightrail::Validator.get_shopper_id(create_params) || nil
@@ -79,6 +90,14 @@ module Lightrail
       end
 
       params_with_user_supplied_id
+    end
+
+    def self.set_account_card_type(create_account_params)
+      if (create_account_params['cardType'] && create_account_params['cardType'] != 'ACCOUNT_CARD') ||
+          (create_account_params[:cardType] && create_account_params[:cardType] != 'ACCOUNT_CARD')
+        raise Lightrail::LightrailArgumentError.new("Cannot create account card if cardType set to value other than 'ACCOUNT_CARD': #{create_account_params.inspect}")
+      end
+      create_account_params[:cardType] = 'ACCOUNT_CARD'
     end
 
     def self.set_name_if_present(create_params)

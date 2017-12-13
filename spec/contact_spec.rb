@@ -24,6 +24,18 @@ RSpec.describe Lightrail::Contact do
       last_name: 'Lastname',
   }}
 
+  let(:create_account_params_with_shopper_id) {{
+      shopper_id: example_shopper_id,
+      currency: example_currency,
+      user_supplied_id: 'this-is-a-new-account',
+  }}
+
+  let(:create_account_params_with_contact_id) {{
+      contact_id: example_contact_id,
+      currency: example_currency,
+      user_supplied_id: 'this-is-a-new-account',
+  }}
+
   let(:charge_params_with_contact_id) {{
       value: -1,
       currency: 'ABC',
@@ -102,6 +114,42 @@ RSpec.describe Lightrail::Contact do
                   .with(/contacts\/#{example_contact_id}/)
                   .and_return({"contact" => {}})
       contact.retrieve_by_contact_id(example_contact_id)
+    end
+  end
+
+  describe ".create_account" do
+    it "creates a new account given a shopperId & currency" do
+      expect(lightrail_connection)
+          .to receive(:make_get_request_and_parse_response)
+                  .with(/contacts\?userSuppliedId=#{example_shopper_id}/)
+                  .and_return({"contacts" => [{"contactId" => example_contact_id}]})
+      expect(lightrail_connection)
+          .to receive(:make_post_request_and_parse_response)
+                  .with(/cards/, hash_including(:cardType => 'ACCOUNT_CARD', :contactId => example_contact_id, :userSuppliedId => 'this-is-a-new-account'))
+                  .and_return({"card" => {}})
+      contact.create_account(create_account_params_with_shopper_id)
+    end
+
+    it "creates a new account given a contactId & currency" do
+      expect(lightrail_connection)
+          .to receive(:make_post_request_and_parse_response)
+                  .with(/cards/, hash_including(:cardType => 'ACCOUNT_CARD', :contactId => example_contact_id, :userSuppliedId => 'this-is-a-new-account'))
+                  .and_return({"card" => {}})
+      contact.create_account(create_account_params_with_contact_id)
+    end
+
+    describe "error handling" do
+      it "throws an error if no contactId or shopperId" do
+        expect {contact.create_account({currency: 'ABC', userSuppliedId: 'id'})}.to raise_error(Lightrail::LightrailArgumentError)
+      end
+
+      it "throws an error if no currency" do
+        expect {contact.create_account({contactId: 'ABC', userSuppliedId: 'id'})}.to raise_error(Lightrail::LightrailArgumentError)
+      end
+
+      it "throws an error if no userSuppliedId" do
+        expect {contact.create_account({currency: 'ABC', shopperId: 'id'})}.to raise_error(Lightrail::LightrailArgumentError)
+      end
     end
   end
 

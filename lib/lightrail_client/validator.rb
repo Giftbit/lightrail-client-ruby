@@ -63,6 +63,20 @@ module Lightrail
       raise Lightrail::LightrailArgumentError.new("Invalid create_params for set_params_for_card_create!!: #{create_params.inspect}")
     end
 
+    def self.set_params_for_account_create!(create_account_params)
+      validated_params = create_account_params.clone
+
+      begin
+        return validated_params if ((validated_params.is_a? Hash) &&
+            self.set_userSuppliedId_from_existing!(validated_params, validated_params) &&
+            self.set_contactId_from_contact_or_shopper_id!(validated_params, validated_params) &&
+            self.validate_currency!(validated_params[:currency]) &&
+            Lightrail::Contact.set_account_card_type(validated_params))
+      rescue Lightrail::LightrailArgumentError
+      end
+      raise Lightrail::LightrailArgumentError.new("Invalid create_account_params for set_params_for_account_create!: #{create_account_params.inspect}")
+    end
+
     def self.set_nsf_for_simulate!(charge_params)
       params_for_simulate = charge_params.clone
       if (!params_for_simulate.key?([:nsf]) && !params_for_simulate.key?(['nsf']))
@@ -193,6 +207,25 @@ module Lightrail
 
     def self.set_transactionId!(destination_params, source_params)
       destination_params[:transactionId] = self.has_valid_transaction_id?(source_params) ? self.get_transaction_id(source_params) : nil
+    end
+
+    def self.set_contactId_from_contact_or_shopper_id!(destination_params, source_params)
+      contact_id = Lightrail::Validator.has_valid_contact_id?(source_params) ? Lightrail::Validator.get_contact_id(source_params) : nil
+      shopper_id = Lightrail::Validator.has_valid_shopper_id?(source_params) ? Lightrail::Validator.get_shopper_id(source_params) : nil
+
+      raise Lightrail::LightrailArgumentError.new("Must set one of shopper_id or contact_id in #{source_params.inspect}.") unless shopper_id || contact_id
+
+      contact_id_from_shopper_id = shopper_id ? Lightrail::Contact.get_contact_id_from_shopper_id(shopper_id) : nil
+
+      if contact_id && contact_id_from_shopper_id && (contact_id != contact_id_from_shopper_id)
+        raise Lightrail::LightrailArgumentError.new("Error from set_contactId_from_contact_or_shopper_id!: received shopper_id #{shopper_id} and contact_id #{contact_id} which do not belong to the same contact.")
+      end
+
+      destination_params[:contactId] = contact_id || contact_id_from_shopper_id
+    end
+
+    def self.set_userSuppliedId_from_existing!(destination_params, source_params)
+      destination_params[:userSuppliedId] ||= self.has_valid_user_supplied_id?(source_params) ? self.get_user_supplied_id(source_params) : nil
     end
 
     def self.get_or_set_userSuppliedId!(charge_params)
