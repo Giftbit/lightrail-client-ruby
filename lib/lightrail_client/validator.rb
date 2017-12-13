@@ -51,6 +51,18 @@ module Lightrail
       raise Lightrail::LightrailArgumentError.new("Invalid fund_params for set_params_for_card_id_fund!: #{fund_params.inspect}")
     end
 
+    def self.set_params_for_card_create!(create_params)
+      validated_params = create_params.clone
+      begin
+        return validated_params if ((validated_params.is_a? Hash) &&
+            self.validate_currency!(validated_params[:currency]) &&
+            self.has_valid_user_supplied_id?(validated_params) &&
+            validated_params[:userSuppliedId] ||= self.get_user_supplied_id(create_params))
+      rescue Lightrail::LightrailArgumentError
+      end
+      raise Lightrail::LightrailArgumentError.new("Invalid create_params for set_params_for_card_create!!: #{create_params.inspect}")
+    end
+
     def self.set_nsf_for_simulate!(charge_params)
       params_for_simulate = charge_params.clone
       if (!params_for_simulate.key?([:nsf]) && !params_for_simulate.key?(['nsf']))
