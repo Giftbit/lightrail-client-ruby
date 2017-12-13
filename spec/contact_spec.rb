@@ -18,6 +18,12 @@ RSpec.describe Lightrail::Contact do
       user_supplied_id: example_shopper_id,
   }}
 
+  let(:create_params_with_name) {{
+      shopper_id: example_shopper_id,
+      first_name: 'Firstname',
+      last_name: 'Lastname',
+  }}
+
   let(:charge_params_with_contact_id) {{
       value: -1,
       currency: 'ABC',
@@ -58,6 +64,24 @@ RSpec.describe Lightrail::Contact do
                   .with(/contacts/, hash_including(:userSuppliedId))
                   .and_return({"contact" => {"userSuppliedId" => "this-is-a-shopper-id"}})
       contact.create(create_params_with_user_supplied_id)
+    end
+
+    it "creates a new contact with names if present" do
+      expect(lightrail_connection)
+          .to receive(:make_post_request_and_parse_response)
+                  .with(/contacts/, hash_including(:userSuppliedId, :firstName, :lastName))
+                  .and_return({"contact" => {}})
+      contact.create(create_params_with_name)
+    end
+
+    it "creates a new contact with email if present" do
+      create_params_with_email = create_params_with_shopper_id.clone
+      create_params_with_email[:email] = 'email@example.com'
+      expect(lightrail_connection)
+          .to receive(:make_post_request_and_parse_response)
+                  .with(/contacts/, hash_including(:userSuppliedId, :email))
+                  .and_return({"contact" => {}})
+      contact.create(create_params_with_email)
     end
   end
 

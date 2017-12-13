@@ -3,7 +3,8 @@ module Lightrail
 
     def self.create(create_params)
       params_with_user_supplied_id = self.set_user_supplied_id_for_contact_create(create_params)
-      response = Lightrail::Connection.send :make_post_request_and_parse_response, "contacts", params_with_user_supplied_id
+      params_with_name_if_present = self.set_name_if_present(params_with_user_supplied_id)
+      response = Lightrail::Connection.send :make_post_request_and_parse_response, "contacts", params_with_name_if_present
       response['contact']
     end
 
@@ -68,6 +69,13 @@ module Lightrail
       end
 
       params_with_user_supplied_id
+    end
+
+    def self.set_name_if_present(create_params)
+      params_with_name = create_params.clone
+      params_with_name[:firstName] ||= params_with_name[:first_name]
+      params_with_name[:lastName] ||= params_with_name[:last_name]
+      params_with_name
     end
 
     def self.get_account_card_id_by_contact_id(contact_id, currency)
