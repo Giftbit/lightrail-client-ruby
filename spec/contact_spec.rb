@@ -10,6 +10,14 @@ RSpec.describe Lightrail::Contact do
   let(:example_card_id) {'this-is-a-card-id'}
   let(:example_currency) {'ABC'}
 
+  let(:create_params_with_shopper_id) {{
+      shopper_id: example_shopper_id,
+  }}
+
+  let(:create_params_with_user_supplied_id) {{
+      user_supplied_id: example_shopper_id,
+  }}
+
   let(:charge_params_with_contact_id) {{
       value: -1,
       currency: 'ABC',
@@ -34,6 +42,24 @@ RSpec.describe Lightrail::Contact do
       shopper_id: example_shopper_id,
   }}
 
+
+  describe ".create" do
+    it "creates a new contact given a shopperId" do
+      expect(lightrail_connection)
+          .to receive(:make_post_request_and_parse_response)
+                  .with(/contacts/, hash_including(:userSuppliedId))
+                  .and_return({"contact" => {"userSuppliedId" => "this-is-a-shopper-id"}})
+      contact.create(create_params_with_shopper_id)
+    end
+
+    it "creates a new contact given a userSuppliedId" do
+      expect(lightrail_connection)
+          .to receive(:make_post_request_and_parse_response)
+                  .with(/contacts/, hash_including(:userSuppliedId))
+                  .and_return({"contact" => {"userSuppliedId" => "this-is-a-shopper-id"}})
+      contact.create(create_params_with_user_supplied_id)
+    end
+  end
 
   describe ".charge_account" do
     it "charges a contact's account given a contactId & currency" do

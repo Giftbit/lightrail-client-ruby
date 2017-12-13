@@ -1,6 +1,12 @@
 module Lightrail
   class Contact < Lightrail::LightrailObject
 
+    def self.create(create_params)
+      params_with_user_supplied_id = self.set_user_supplied_id_for_contact_create(create_params)
+      response = Lightrail::Connection.send :make_post_request_and_parse_response, "contacts", params_with_user_supplied_id
+      response['contact']
+    end
+
     def self.charge_account(charge_params)
       params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(charge_params)
       Lightrail::Card.charge(params_with_account_card_id)
@@ -42,6 +48,26 @@ module Lightrail
       params_with_card_id.delete(:contact_id)
       params_with_card_id.delete(:shopper_id)
       params_with_card_id
+    end
+
+    def self.set_user_supplied_id_for_contact_create(create_params)
+      params_with_user_supplied_id = create_params.clone
+      shopper_id = Lightrail::Validator.get_shopper_id(create_params) || nil
+      user_supplied_id = Lightrail::Validator.get_user_supplied_id(create_params) || nil
+
+      if !(shopper_id || user_supplied_id)
+        raise Lightrail::LightrailArgumentError.new("Must provide one of shopper_id or user_supplied_id to create new Contact")
+      elsif (shopper_id && user_supplied_id)
+        raise Lightrail::LightrailArgumentError.new("Must provide only one of shopper_id or user_supplied_id to create new Contact")
+      end
+
+      if shopper_id
+        params_with_user_supplied_id[:userSuppliedId] ||= shopper_id
+      elsif user_supplied_id
+        params_with_user_supplied_id[:userSuppliedId] ||= user_supplied_id
+      end
+
+      params_with_user_supplied_id
     end
 
     def self.get_account_card_id_by_contact_id(contact_id, currency)
