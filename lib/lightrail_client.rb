@@ -19,6 +19,7 @@ require "lightrail_client/transaction"
 require "lightrail_client/card"
 require "lightrail_client/code"
 require "lightrail_client/contact"
+require "lightrail_client/account"
 
 module Lightrail
   class << self

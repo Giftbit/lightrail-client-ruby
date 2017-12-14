@@ -28,7 +28,7 @@ module Lightrail
       begin
         return validated_params if ((validated_params.is_a? Hash) &&
             (self.set_cardId!(validated_params, validated_params) ||
-                Lightrail::Contact.replace_contact_id_or_shopper_id_with_card_id(validated_params)) &&
+                Lightrail::Account.replace_contact_id_or_shopper_id_with_card_id(validated_params)) &&
             self.validate_amount!(validated_params[:amount] || validated_params[:value]) &&
             self.validate_currency!(validated_params[:currency]) &&
             self.get_or_set_userSuppliedId!(validated_params))
@@ -42,7 +42,7 @@ module Lightrail
       begin
         return validated_params if ((validated_params.is_a? Hash) &&
             (self.set_cardId!(validated_params, validated_params) ||
-                Lightrail::Contact.replace_contact_id_or_shopper_id_with_card_id(validated_params)) &&
+                Lightrail::Account.replace_contact_id_or_shopper_id_with_card_id(validated_params)) &&
             self.validate_amount!(validated_params[:amount] || validated_params[:value]) &&
             self.validate_currency!(validated_params[:currency]) &&
             self.get_or_set_userSuppliedId!(validated_params))
@@ -71,7 +71,7 @@ module Lightrail
             self.set_userSuppliedId_from_existing!(validated_params, validated_params) &&
             self.set_contactId_from_contact_or_shopper_id!(validated_params, validated_params) &&
             self.validate_currency!(validated_params[:currency]) &&
-            Lightrail::Contact.set_account_card_type(validated_params))
+            Lightrail::Account.set_account_card_type(validated_params))
       rescue Lightrail::LightrailArgumentError
       end
       raise Lightrail::LightrailArgumentError.new("Invalid create_account_params for set_params_for_account_create!: #{create_account_params.inspect}")
