@@ -6,6 +6,20 @@ module Lightrail
       response['card']
     end
 
+    def self.retrieve_by_shopper_id_and_currency(shopper_id, currency)
+      Lightrail::Validator.validate_shopper_id!(shopper_id)
+      Lightrail::Validator.validate_currency!(currency)
+      contact_id = Lightrail::Contact.retrieve_by_shopper_id(shopper_id)['contactId']
+      self.retrieve_by_contact_id_and_currency(contact_id, currency)
+    end
+
+    def self.retrieve_by_contact_id_and_currency(contact_id, currency)
+      Lightrail::Validator.validate_contact_id!(contact_id)
+      Lightrail::Validator.validate_currency!(currency)
+      response = Lightrail::Connection.send :make_get_request_and_parse_response, "cards?cardType=ACCOUNT_CARD&contactId=#{CGI::escape(contact_id)}&currency=#{CGI::escape(currency)}"
+      response['card']
+    end
+
     def self.charge(charge_params)
       params_with_account_card_id = self.replace_contact_id_or_shopper_id_with_card_id(charge_params)
       Lightrail::Card.charge(params_with_account_card_id)
