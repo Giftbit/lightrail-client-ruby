@@ -117,7 +117,7 @@ RSpec.describe Lightrail::Account do
     end
 
     describe "error handling" do
-      it "throws an error if no contactId" do
+      it "throws an error if no shopperId" do
         expect {account.retrieve_by_shopper_id_and_currency('', 'ABC')}.to raise_error(Lightrail::LightrailArgumentError)
       end
 

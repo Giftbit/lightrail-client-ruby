@@ -75,7 +75,7 @@ module Lightrail
     # end
 
     def self.get_account_card_by_contact_id_and_currency(contact_id, currency)
-      response = Lightrail::Connection.make_get_request_and_parse_response("cards?contactId=#{contact_id}&cardType=ACCOUNT_CARD&currency=#{currency}")
+      response = Lightrail::Connection.make_get_request_and_parse_response("cards?contactId=#{CGI::escape(contact_id)}&cardType=ACCOUNT_CARD&currency=#{CGI::escape(currency)}")
       response['cards'][0]
     end
 

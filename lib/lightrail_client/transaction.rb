@@ -51,10 +51,10 @@ module Lightrail
       response = {}
       if (transaction_params[:code])
         code = transaction_params.delete(:code)
-        response = Lightrail::Connection.send :make_post_request_and_parse_response, "codes/#{code}/transactions#{dry_run}", transaction_params
+        response = Lightrail::Connection.send :make_post_request_and_parse_response, "codes/#{CGI::escape(code)}/transactions#{dry_run}", transaction_params
       elsif (transaction_params[:cardId])
         card_id = transaction_params.delete(:cardId)
-        response = Lightrail::Connection.send :make_post_request_and_parse_response, "cards/#{card_id}/transactions#{dry_run}", transaction_params
+        response = Lightrail::Connection.send :make_post_request_and_parse_response, "cards/#{CGI::escape(card_id)}/transactions#{dry_run}", transaction_params
       else
         raise Lightrail::LightrailArgumentError.new("Lightrail code or cardId required to post a transaction: #{transaction_params.inspect}")
       end
@@ -66,7 +66,7 @@ module Lightrail
       if (transaction_params[:cardId])
         card_id = transaction_params.delete(:cardId)
         transaction_id = transaction_params.delete(:transactionId)
-        response = Lightrail::Connection.send :make_post_request_and_parse_response, "cards/#{card_id}/transactions/#{transaction_id}/#{action}", transaction_params
+        response = Lightrail::Connection.send :make_post_request_and_parse_response, "cards/#{CGI::escape(card_id)}/transactions/#{CGI::escape(transaction_id)}/#{action}", transaction_params
       else
         raise Lightrail::LightrailArgumentError.new("Lightrail cardId required to act on an existing transaction: #{transaction_params.inspect}")
       end

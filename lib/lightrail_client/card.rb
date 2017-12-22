@@ -32,7 +32,7 @@ module Lightrail
     end
 
     def self.get_details(card_id)
-      response = Lightrail::Connection.make_get_request_and_parse_response("cards/#{card_id}/details")
+      response = Lightrail::Connection.make_get_request_and_parse_response("cards/#{CGI::escape(card_id)}/details")
       response['details']
     end
 

@@ -22,7 +22,7 @@ module Lightrail
     end
 
     def self.get_details(code)
-      response = Lightrail::Connection.make_get_request_and_parse_response("codes/#{code}/details")
+      response = Lightrail::Connection.make_get_request_and_parse_response("codes/#{CGI::escape(code)}/details")
       response['details']
     end
 
