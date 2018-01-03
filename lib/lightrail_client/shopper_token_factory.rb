@@ -35,12 +35,7 @@ module Lightrail
         payload['exp'] = iat + validity_in_seconds
       end
 
-      token = [
-          {'data' => payload},
-          {'alg' => 'HS256'}
-      ]
-
-      JWT.encode(token, Lightrail::shared_secret, 'HS256')
+      JWT.encode(payload, Lightrail::shared_secret, 'HS256')
     end
   end
 end

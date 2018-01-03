@@ -19,39 +19,39 @@ RSpec.describe Lightrail::ShopperTokenFactory do
     it "generates a JWT with the supplied shopper_id" do
       token = factory.generate({shopper_id: example_shopper_id})
       decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
-      expect(decoded[0][0]['data']['g']['shi']).to eq(example_shopper_id)
+      expect(decoded[0]['g']['shi']).to eq(example_shopper_id)
     end
 
     it "generates a JWT with the supplied contact_id" do
       token = factory.generate({contact_id: example_contact_id})
       decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
-      expect(decoded[0][0]['data']['g']['coi']).to eq(example_contact_id)
+      expect(decoded[0]['g']['coi']).to eq(example_contact_id)
     end
 
     it "generates a JWT with the supplied contact user_supplied_id" do
       token = factory.generate({user_supplied_id: example_user_supplied_id})
       decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
 
-      expect(decoded[0][0]['data']['g']['cui']).to eq(example_user_supplied_id)
+      expect(decoded[0]['g']['cui']).to eq(example_user_supplied_id)
     end
 
     it "correctly applies the specified validity period" do
       token = factory.generate({shopper_id: example_shopper_id}, 12)
       decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
 
-      expect(decoded[0][0]['data']['exp']).to eq(decoded[0][0]['data']['iat'] + 12)
+      expect(decoded[0]['exp']).to eq(decoded[0]['iat'] + 12)
     end
 
     it "includes 'iat'" do
       token = factory.generate({shopper_id: example_shopper_id})
       decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
-      expect(decoded[0][0]['data']['iat']).to be_a(Integer)
+      expect(decoded[0]['iat']).to be_a(Integer)
     end
 
     it "includes 'iss: MERCHANT'" do
       token = factory.generate({shopper_id: example_shopper_id})
       decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
-      expect(decoded[0][0]['data']['iss']).to eq("MERCHANT")
+      expect(decoded[0]['iss']).to eq("MERCHANT")
     end
   end
 end
