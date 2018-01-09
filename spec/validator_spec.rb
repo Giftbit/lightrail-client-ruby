@@ -77,7 +77,7 @@ RSpec.describe Lightrail::Validator do
       it "returns true when the required keys are present - charge by contact" do
         expect(Lightrail::Connection)
             .to receive(:make_get_request_and_parse_response)
-                    .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=USD/)
+                    .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=USD/)
                     .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
 
         expect(validator.validate_charge_object!(contact_id_charge_params)).to be true
@@ -90,7 +90,7 @@ RSpec.describe Lightrail::Validator do
                     .and_return({"contacts" => [{"contactId" => "this-is-a-contact-id"}]})
         expect(Lightrail::Connection)
             .to receive(:make_get_request_and_parse_response)
-                    .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=USD/)
+                    .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=USD/)
                     .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
 
         expect(validator.validate_charge_object!(shopper_id_charge_params)).to be true
@@ -124,7 +124,7 @@ RSpec.describe Lightrail::Validator do
       it "returns true when the required keys are present & formatted - fund by contact" do
         expect(Lightrail::Connection)
             .to receive(:make_get_request_and_parse_response)
-                    .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=USD/)
+                    .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=USD/)
                     .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
 
         expect(validator.validate_fund_object!(contact_id_fund_params)).to be true
@@ -137,7 +137,7 @@ RSpec.describe Lightrail::Validator do
                     .and_return({"contacts" => [{"contactId" => "this-is-a-contact-id"}]})
         expect(Lightrail::Connection)
             .to receive(:make_get_request_and_parse_response)
-                    .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=USD/)
+                    .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=USD/)
                     .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
         expect(validator.validate_fund_object!(shopper_id_fund_params)).to be true
       end

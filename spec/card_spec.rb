@@ -6,6 +6,12 @@ RSpec.describe Lightrail::Card do
   let(:lightrail_connection) {Lightrail::Connection}
 
   let(:example_card_id) {'this-is-a-card-id'}
+  let(:example_user_supplied_id) {'this-is-a-user-supplied-id'}
+
+  let(:create_params) {{
+      currency: 'USD',
+      user_supplied_id: example_user_supplied_id,
+  }}
 
   let(:charge_params) {{
       value: -1,
@@ -26,6 +32,13 @@ RSpec.describe Lightrail::Card do
           {"valueStoreType" => "ATTACHED", "value" => 3175, "state" => "EXPIRED"}
       ]
   }}
+
+  describe ".create" do
+    it "creates a card" do
+      expect(lightrail_connection).to receive(:make_post_request_and_parse_response).with(/cards/, hash_including(:currency, :userSuppliedId)).and_return({"transaction" => {}})
+      card.create(create_params)
+    end
+  end
 
   describe ".charge" do
     it "posts a charge to a card" do

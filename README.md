@@ -1,35 +1,44 @@
 # Lightrail Client Gem (beta)
 
-Lightrail is a modern platform for digital account credits, gift cards, promotions, and points (to learn more, visit [Lightrail](https://www.lightrail.com/)). The Lightrail Client Gem is a basic library for developers to easily connect with the Lightrail API using Ruby. If you are looking for specific use cases or other languages, check out [related projects](#related-projects) and the complete list of all Lightrail libraries and integrations in the Integrations section of the [Lightrail API documentation](https://www.lightrail.com/docs/).
+Lightrail is a modern platform for digital account credits, gift cards, promotions, and points (to learn more, visit [Lightrail](https://www.lightrail.com/)). The Lightrail Client Gem is a basic library for developers to easily connect with the Lightrail API using Ruby. If you are looking for specific use cases or other languages, check out the complete list of all [Lightrail libraries and integrations](https://github.com/Giftbit/Lightrail-API-Docs/blob/master/docs/client-libraries.md).
 
 ## Features
 
 The following features are supported in this version:
 
+- Account Credits: create, retrieve, charge, refund, balance-check, and fund.
 - Gift Cards: charge, refund, balance-check, and fund.
-- Account Credits: charge, refund, balance-check, and fund.
 
-Note that the Lightrail API supports many other features and we are working on covering them in this gem. For the full picture of Lightrail API features check out the [Lightrail API documentation](https://www.lightrail.com/docs/).
+Note that the Lightrail API supports many other features and we are working on covering them in this gem. For a complete list of Lightrail API features check out the [Lightrail API documentation](https://www.lightrail.com/docs/).
+
+## Related Projects
+
+Check out the full list of [Lightrail client libraries and integrations](https://github.com/Giftbit/Lightrail-API-Docs/blob/master/docs/client-libraries.md). 
 
 ## Usage
 
-Before using any parts of the library, you need to set up your Lightrail API key:
+Before using any parts of the library, you'll need to configure it to use your API key:
 
 ```ruby
-Lightrail.api_key = "<your lightrail API key>";
+Lightrail.api_key = "<your lightrail API key>"
 ```
 
 *A note on sample code snippets: for reasons of legibility, the output for most calls has been simplified. Attributes of response objects that are not relevant here have been omitted.*
 
-## Related Projects
+### Use Case: Account Credits Powered by Lightrail
 
-- [Lightrail Stripe Gem](https://github.com/Giftbit/lightrail-stripe-ruby)
-- [Lightrail Java Client](https://github.com/Giftbit/lightrail-client-java)
-- [Lightrail-Stripe Java Integration](https://github.com/Giftbit/lightrail-stripe-java)
+For a quick demonstration of implementing account credits using this library, see our [Accounts Quickstart](https://github.com/Giftbit/Lightrail-API-Docs/blob/master/docs/quickstart/accounts.md). 
 
-### Gift Cards
 
-A Lightrail gift card is a virtual device for issuing gift values. Each gift card has a specific `currency`, a `cardId`, and a `fullCode`, which is a unique unguessable alphanumeric string, usually released to the gift recipient in confidence. The recipient of the gift card can present the `fullCode` to redeem the gift value. For further explanation of cards and codes see the [Lightrail API documentation](https://www.lightrail.com/docs/).
+### Use Case: Gift Cards
+
+**Looking for Lightrail's Drop-In Gift Card Solution?** 
+
+Check out our [Drop-in Gift Card documentation](https://github.com/Giftbit/Lightrail-API-Docs/blob/master/docs/quickstart/drop-in-gift-cards.md#drop-in-gift-cards) to get started.
+
+**Prefer to build it yourself?**
+
+The remainder of this document is a detailed overview of the methods this library offers for managing Gift Cards. It assumes familiarity with the concepts in our [Gift Card guide](https://github.com/Giftbit/Lightrail-API-Docs/blob/master/use-cases/gift-card.md).
 
 #### Balance Check
 
@@ -37,7 +46,7 @@ There are several ways to check the balance of a gift card or code. Because you 
 
 ##### Maximum Value
 
-To get the maximum value of a card/code, i.e. the sum of all active value stores, call either `Card.get_maximum_value(<CARD ID>)` or `Code.get_maximum_value(<CODE>)`. This method will return an integer which represents the sum of all active value stores in the smalled currency unit (e.g. cents):
+To get the maximum value of a card/code, i.e. the sum of all active value stores, call either `Card.get_maximum_value(<CARD ID>)` or `Code.get_maximum_value(<CODE>)`. This method will return an integer which represents the sum of all active value stores in the smallest currency unit (e.g. cents):
 
 ```ruby
 maximum_gift_value = Lightrail::Card.get_maximum_value("<GIFT CARD ID>")
@@ -51,7 +60,7 @@ maximum_gift_value = Lightrail::Card.get_maximum_value("<GIFT CARD ID>")
 
 If you would like to see a breakdown of how the value is stored on a card or code you can use the `.get_details` method. This will return a breakdown of all attached value stores, along with other important information:
 
-```ruby
+```
 gift_details = Lightrail::Card.get_details("<GIFT CARD ID>")
 # or use the code:
 # gift_details = Lightrail::Code.get_details("<GIFT CODE>")
@@ -261,152 +270,6 @@ gift_fund = Lightrail::Card.fund({
     }
 ```
 
-## Customer Accounts
-
-Customer Accounts are values attached to a customer and are commonly used for customer rewards and account credit programs. For further explanation of this concept check out the [Lightrail API documentation](https://www.lightrail.com/docs/).
-
-You can interact with Customer Accounts through the `Lightrail::Contact` class. All the same functionality is offered for contact accounts as for gift cards, except that to identify a contact and transact against their account, you would pass in either a `contact_id` (generated by Lightrail) or a `shopper_id` (generated by your ecommerce store), instead of a gift card's `card_id`. Code samples follow; for more detail on how any method works, please see the gift card documentation above.
-
-#### Account Balance Check
-
-All of the same methods for checking the balance of a customer's account are available as for checking the balance of a gift card or code. **Note however that the account balance check methods require different parameters than their Gift Card counterparts:** since a single contact can have several accounts in different currencies, it is necessary to specify the account currency in a hash along with the contact identifier.
-
-##### Maximum Value
-
-Accounts can have attached promotions that add value to the account, subject to certain conditions. Call `Lightrail::Contact.get_maximum_account_value` to get the maximum possible balance, i.e. the sum of all attached value stores that are active:
-
-```ruby
-account_maximum_value = Lightrail::Contact.get_maximum_account_value({
-    contact_id: '<CONTACT ID>',     # or instead of contact_id: shopper_id: '<SHOPPER ID>'
-    currency: 'USD'
-  })
-
-#=> 3550
-```
-
-##### Account Details
-
-Use the `.get_account_details` method to see a breakdown of how account value is stored, along with other important information:
-
-```ruby
-account_maximum_value = Lightrail::Contact.get_account_details({
-    contact_id: '<CONTACT ID>',     # or instead of contact_id: shopper_id: '<SHOPPER ID>'
-    currency: 'USD'
-  })
-
-#=> {
-        "valueStores": [
-            {
-                "valueStoreType": "PRINCIPAL",
-                "value": 483,
-                "state": "ACTIVE",
-                "programId": "program-123456",
-                "valueStoreId": "value-11111111",
-                "restrictions": []
-            },
-            {
-                "valueStoreType": "ATTACHED",
-                "value": 500,
-                "state": "EXPIRED",
-                "expires": "2017-09-13T19:29:37.464Z",
-                "programId": "program-24680",
-                "valueStoreId": "value-3333333",
-                "restrictions": ["Cart must have five or more items"]
-            }
-        ],
-        "currency": "USD",
-        "cardType": "ACCOUNT_CARD",
-        "asAtDate": "2017-11-06T19:29:41.533Z",
-        "cardId": "card-12q4wresdgf6ey",
-        "codeLastFour": "WXYZ"
-    }
-}
-```
-
-##### Simulate Transaction
-
-Use the `.simulate_account_charge` method to see how much is available for a specific transaction. Simply pass in all the same parameters as you would to make a regular charge (see below) **including metadata** so that the Lightrail engine can assess whether necessary conditions are met for any attached value.
-
-The `value` of the response will indicate the maximum amount that can be charged given the context of the transaction, which can be useful when presenting your customer with a confirmation dialogue. The `value`  is a drawdown amount and will therefore be negative:
-
-```ruby
-simulated_charge = Lightrail::Contact.simulate_charge({
-                                      value: -1850,
-                                      currency: 'USD',
-                                      contact_id: '<CONTACT ID>',
-                                      metadata: {cart: {items_total: 5}},
-                                    })
-#=> {
-       "value"=>-1550,
-       "userSuppliedId"=>"2bfb5ccb",
-       "transactionType"=>"DRAWDOWN",
-       "currency"=>"USD",
-       "transactionBreakdown": [
-            {
-                "value": -1234,
-                "valueAvailableAfterTransaction": 0,
-                "valueStoreId": "value-4f9a362e7206445796d934727e0d2b27"
-            },
-            {
-                "value": -616,
-                "valueAvailableAfterTransaction": 0,
-                "valueStoreId": "value-9850b36634b541f5bc6fd280b0198b3d",
-                "restrictions": ["Cart must have five or more items"],
-            }
-         ],
-       "transactionId": null,
-       "dateCreated": null,
-       #...
-    }
-```
-
-Note that because this is a simulated transaction and not a real transaction, the `transactionId` and `dateCreated` will both be `null`.
-
-#### Charging and Funding and Account
-
-You can charge or fund the account by specifying the currency and the amount:
-
-```ruby
-charge = Lightrail::Contact.charge_account({
-    contact_id: '<CONTACT ID>',     # or instead use shopper_id: '<SHOPPER ID>'
-    currency: 'USD',
-    value: -1350
-  })
-
-fund = Lightrail::Contact.fund_account({
-    contact_id: '<CONTACT ID>',     # or instead use shopper_id: '<SHOPPER ID>'
-    currency: 'USD',
-    value: 500
-  })
-```
-
-As with gift cards, an account can also be charged by following an authorize-capture flow by adding `pending: true` to the charge params hash:
-
-```ruby
-authorize_charge = Lightrail::Contact.charge_account({
-    contact_id: '<CONTACT ID>',     # or instead use shopper_id: '<SHOPPER ID>'
-    currency: 'USD',
-    value: -1350,
-    pending: true
-  })
-
-# later on:
-caputure_charge = Lightrail::Transaction.capture(authorize_charge)
-
-# or void the transaction instead:
-void_charge = Lightrail::Transaction.void(authorize_charge)
-```
-
-#### Refunding an Account Charge
-
-You can refund an account charge the same way you would refund any other Lightrail Transaction:
-
-```ruby
-charge = Lightrail::Contact.charge_account({...})
-
-# later on:
-refund = Lightrail::Transaction.refund(charge)
-```
 
 ## Installation
 

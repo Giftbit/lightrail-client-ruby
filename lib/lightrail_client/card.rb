@@ -1,6 +1,12 @@
 module Lightrail
   class Card < Lightrail::LightrailObject
 
+    def self.create(create_params)
+      params_for_create = Lightrail::Validator.set_params_for_card_create!(create_params)
+      response = Lightrail::Connection.send :make_post_request_and_parse_response, "cards", params_for_create
+      response['card']
+    end
+
     def self.charge(charge_params)
       Lightrail::Transaction.charge_card(charge_params, false)
     end
@@ -26,7 +32,7 @@ module Lightrail
     end
 
     def self.get_details(card_id)
-      response = Lightrail::Connection.make_get_request_and_parse_response("cards/#{card_id}/details")
+      response = Lightrail::Connection.make_get_request_and_parse_response("cards/#{CGI::escape(card_id)}/details")
       response['details']
     end
 
