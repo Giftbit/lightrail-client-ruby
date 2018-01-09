@@ -34,7 +34,7 @@ For a quick demonstration of implementing account credits using this library, se
 
 **Looking for Lightrail's Drop-In Gift Card Solution?** 
 
-Lightrail's Drop-in Gift Card solution makes it very easy to add gift cards and account credits to your application. The solution is component based, using snippets that can be included for gift card sending and redemption. It requires minimal updates to your existing checkout process. Check out the [Drop-in Gift Card documentation](https://github.com/Giftbit/Lightrail-API-Docs/blob/master/docs/quickstart/drop-in-gift-cards.md#drop-in-gift-cards) to get started.
+Check out our [Drop-in Gift Card documentation](https://github.com/Giftbit/Lightrail-API-Docs/blob/master/docs/quickstart/drop-in-gift-cards.md#drop-in-gift-cards) to get started.
 
 **Prefer to build it yourself?**
 
