@@ -6,18 +6,14 @@ module Lightrail
       response['card']
     end
 
-    def self.retrieve_by_shopper_id_and_currency(shopper_id, currency)
-      Lightrail::Validator.validate_shopper_id!(shopper_id)
+    def self.retrieve(account_retrieval_params)
+      new_params = account_retrieval_params.clone
+      currency = new_params[:currency] || new_params['currency']
       Lightrail::Validator.validate_currency!(currency)
-      contact_id = Lightrail::Contact.retrieve_by_shopper_id(shopper_id)['contactId']
-      self.retrieve_by_contact_id_and_currency(contact_id, currency)
-    end
-
-    def self.retrieve_by_contact_id_and_currency(contact_id, currency)
-      Lightrail::Validator.validate_contact_id!(contact_id)
-      Lightrail::Validator.validate_currency!(currency)
+      Lightrail::Validator.set_contactId_from_contact_or_shopper_id!(new_params, new_params)
+      contact_id = new_params[:contactId]
       response = Lightrail::Connection.send :make_get_request_and_parse_response, "cards?cardType=ACCOUNT_CARD&contactId=#{CGI::escape(contact_id)}&currency=#{CGI::escape(currency)}"
-      response['card']
+      response['cards'][0]
     end
 
     def self.charge(charge_params)
@@ -52,7 +48,7 @@ module Lightrail
       contact_id = Lightrail::Contact.get_contact_id_from_id_or_shopper_id(transaction_params)
 
       if contact_id
-        account_card_id = self.get_account_card_by_contact_id_and_currency(contact_id, transaction_params[:currency])['cardId']
+        account_card_id = self.retrieve({contact_id: contact_id, currency: transaction_params[:currency]})['cardId']
       elsif !Lightrail::Validator.has_valid_card_id?(transaction_params)
         raise Lightrail::LightrailArgumentError.new("Method replace_contact_id_or_shopper_id_with_card_id could not find contact - no contact_id or shopper_id in transaction_params: #{transaction_params.inspect}")
       end
@@ -62,21 +58,6 @@ module Lightrail
       params_with_card_id.delete(:contact_id)
       params_with_card_id.delete(:shopper_id)
       params_with_card_id
-    end
-
-    # def self.get_account_card_id_by_contact_id(contact_id, currency)
-    #   card = self.get_account_card_by_contact_id_and_currency(contact_id, currency)
-    #
-    #   if (!card.nil? && !card.empty? && card['cardId'])
-    #     return card['cardId']
-    #   else
-    #     return nil
-    #   end
-    # end
-
-    def self.get_account_card_by_contact_id_and_currency(contact_id, currency)
-      response = Lightrail::Connection.make_get_request_and_parse_response("cards?contactId=#{CGI::escape(contact_id)}&cardType=ACCOUNT_CARD&currency=#{CGI::escape(currency)}")
-      response['cards'][0]
     end
 
     def self.set_account_card_type(create_account_params)

@@ -83,27 +83,23 @@ RSpec.describe Lightrail::Account do
     end
   end
 
-  describe ".retrieve_by_contact_id_and_currency" do
+  describe ".retrieve" do
     it "retrieves an account card by contactId and currency" do
       expect(lightrail_connection)
           .to receive(:make_get_request_and_parse_response)
                   .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
                   .and_return({"cards" => [{"contactId" => example_contact_id, "cardId" => example_card_id}]})
-      account.retrieve_by_contact_id_and_currency(example_contact_id, example_currency)
+      account.retrieve({contact_id: example_contact_id, currency: example_currency})
     end
 
-    describe "error handling" do
-      it "throws an error if no contactId" do
-        expect {account.retrieve_by_contact_id_and_currency('', 'ABC')}.to raise_error(Lightrail::LightrailArgumentError)
-      end
-
-      it "throws an error if no currency" do
-        expect {account.retrieve_by_contact_id_and_currency('ABC', '')}.to raise_error(Lightrail::LightrailArgumentError)
-      end
+    it "retrieves an account card by contactId and currency - string hash keys" do
+      expect(lightrail_connection)
+          .to receive(:make_get_request_and_parse_response)
+                  .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
+                  .and_return({"cards" => [{"contactId" => example_contact_id, "cardId" => example_card_id}]})
+      account.retrieve({'contact_id' => example_contact_id, 'currency' => example_currency})
     end
-  end
 
-  describe ".retrieve_by_shopper_id_and_currency" do
     it "retrieves an account card by shopperId and currency" do
       expect(lightrail_connection)
           .to receive(:make_get_request_and_parse_response)
@@ -113,16 +109,16 @@ RSpec.describe Lightrail::Account do
           .to receive(:make_get_request_and_parse_response)
                   .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
                   .and_return({"cards" => [{"contactId" => example_contact_id, "cardId" => example_card_id}]})
-      account.retrieve_by_shopper_id_and_currency(example_shopper_id, example_currency)
+      account.retrieve(shopper_id: example_shopper_id, currency: example_currency)
     end
 
     describe "error handling" do
-      it "throws an error if no shopperId" do
-        expect {account.retrieve_by_shopper_id_and_currency('', 'ABC')}.to raise_error(Lightrail::LightrailArgumentError)
+      it "throws an error if no contactId" do
+        expect {account.retrieve({currency: 'ABC'})}.to raise_error(Lightrail::LightrailArgumentError)
       end
 
       it "throws an error if no currency" do
-        expect {account.retrieve_by_shopper_id_and_currency('ABC', '')}.to raise_error(Lightrail::LightrailArgumentError)
+        expect {account.retrieve(shopper_id: 'ABC')}.to raise_error(Lightrail::LightrailArgumentError)
       end
     end
   end
@@ -131,7 +127,7 @@ RSpec.describe Lightrail::Account do
     it "charges a contact's account given a contactId & currency" do
       expect(lightrail_connection)
           .to receive(:make_get_request_and_parse_response)
-                  .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                  .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
                   .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
       expect(lightrail_connection)
           .to receive(:make_post_request_and_parse_response)
@@ -147,7 +143,7 @@ RSpec.describe Lightrail::Account do
                   .and_return({"contacts" => [{"contactId" => "this-is-a-contact-id"}]})
       expect(lightrail_connection)
           .to receive(:make_get_request_and_parse_response)
-                  .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                  .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
                   .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
       expect(lightrail_connection)
           .to receive(:make_post_request_and_parse_response)
@@ -165,7 +161,7 @@ RSpec.describe Lightrail::Account do
                   .and_return({"contacts" => [{"contactId" => "this-is-a-contact-id"}]})
       expect(lightrail_connection)
           .to receive(:make_get_request_and_parse_response)
-                  .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                  .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
                   .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
       expect(lightrail_connection)
           .to receive(:make_post_request_and_parse_response)
@@ -181,7 +177,7 @@ RSpec.describe Lightrail::Account do
                   .and_return({"contacts" => [{"contactId" => "this-is-a-contact-id"}]})
       expect(lightrail_connection)
           .to receive(:make_get_request_and_parse_response)
-                  .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                  .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
                   .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
       expect(lightrail_connection)
           .to receive(:make_post_request_and_parse_response)
@@ -195,7 +191,7 @@ RSpec.describe Lightrail::Account do
     it "funds a contact's account given a contactId & currency" do
       expect(lightrail_connection)
           .to receive(:make_get_request_and_parse_response)
-                  .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                  .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
                   .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
       expect(lightrail_connection)
           .to receive(:make_post_request_and_parse_response)
@@ -211,7 +207,7 @@ RSpec.describe Lightrail::Account do
                   .and_return({"contacts" => [{"contactId" => "this-is-a-contact-id"}]})
       expect(lightrail_connection)
           .to receive(:make_get_request_and_parse_response)
-                  .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                  .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
                   .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
       expect(lightrail_connection)
           .to receive(:make_post_request_and_parse_response)
@@ -225,7 +221,7 @@ RSpec.describe Lightrail::Account do
     it "gets the account card details given a contactId & currency" do
       expect(lightrail_connection)
           .to receive(:make_get_request_and_parse_response)
-                  .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                  .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
                   .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
       expect(lightrail_connection)
           .to receive(:make_get_request_and_parse_response)
@@ -241,7 +237,7 @@ RSpec.describe Lightrail::Account do
                   .and_return({"contacts" => [{"contactId" => "this-is-a-contact-id"}]})
       expect(lightrail_connection)
           .to receive(:make_get_request_and_parse_response)
-                  .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                  .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
                   .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
       expect(lightrail_connection)
           .to receive(:make_get_request_and_parse_response)
@@ -255,7 +251,7 @@ RSpec.describe Lightrail::Account do
     it "gets the maximum value of the account given a contactId & currency" do
       expect(lightrail_connection)
           .to receive(:make_get_request_and_parse_response)
-                  .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                  .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
                   .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
       expect(Lightrail::Card)
           .to receive(:get_maximum_value)
@@ -270,7 +266,7 @@ RSpec.describe Lightrail::Account do
                   .and_return({"contacts" => [{"contactId" => "this-is-a-contact-id"}]})
       expect(lightrail_connection)
           .to receive(:make_get_request_and_parse_response)
-                  .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                  .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
                   .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
       expect(Lightrail::Card)
           .to receive(:get_maximum_value)
@@ -284,7 +280,7 @@ RSpec.describe Lightrail::Account do
       it "replaces a contact id with a card id" do
         expect(lightrail_connection)
             .to receive(:make_get_request_and_parse_response)
-                    .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                    .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
                     .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
 
         new_params = account.replace_contact_id_or_shopper_id_with_card_id(charge_params_with_contact_id)
@@ -300,7 +296,7 @@ RSpec.describe Lightrail::Account do
                     .and_return({"contacts" => [{"contactId" => "this-is-a-contact-id"}]})
         expect(lightrail_connection)
             .to receive(:make_get_request_and_parse_response)
-                    .with(/cards\?contactId=#{example_contact_id}\&cardType=ACCOUNT_CARD\&currency=#{example_currency}/)
+                    .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
                     .and_return({"cards" => [{"cardId" => "this-is-a-card-id"}]})
 
         new_params = account.replace_contact_id_or_shopper_id_with_card_id(charge_params_with_shopper_id)
