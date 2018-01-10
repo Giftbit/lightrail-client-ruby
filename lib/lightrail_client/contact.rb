@@ -18,6 +18,26 @@ module Lightrail
       response['contact']
     end
 
+    # Utility methods
+
+    def self.get_contact_id_from_id_or_shopper_id(charge_params)
+      if Lightrail::Validator.has_valid_contact_id?(charge_params)
+        return Lightrail::Validator.get_contact_id(charge_params)
+      end
+
+      if Lightrail::Validator.has_valid_shopper_id?(charge_params)
+        shopper_id = Lightrail::Validator.get_shopper_id(charge_params)
+        contact = self.get_by_shopper_id(shopper_id)
+        if (!contact.nil? && !contact.empty? && contact['contactId'])
+          return contact['contactId']
+        else
+          return nil
+        end
+      end
+
+      return nil
+    end
+
     private
 
     def self.get_contact_id_from_shopper_id(shopper_id)
@@ -50,24 +70,6 @@ module Lightrail
       params_with_name[:firstName] ||= params_with_name[:first_name]
       params_with_name[:lastName] ||= params_with_name[:last_name]
       params_with_name
-    end
-
-    def self.get_contact_id_from_id_or_shopper_id(charge_params)
-      if Lightrail::Validator.has_valid_contact_id?(charge_params)
-        return Lightrail::Validator.get_contact_id(charge_params)
-      end
-
-      if Lightrail::Validator.has_valid_shopper_id?(charge_params)
-        shopper_id = Lightrail::Validator.get_shopper_id(charge_params)
-        contact = self.get_by_shopper_id(shopper_id)
-        if (!contact.nil? && !contact.empty? && contact['contactId'])
-          return contact['contactId']
-        else
-          return nil
-        end
-      end
-
-      return nil
     end
 
     def self.get_by_id(contact_id)
