@@ -253,6 +253,11 @@ module Lightrail
       shopperId && self.validate_shopper_id!(shopperId)
     end
 
+    def self.has_valid_or_empty_shopper_id?(charge_params)
+      shopperId = (charge_params.respond_to? :keys) ? self.get_shopper_id(charge_params) : false
+      shopperId && (shopperId === '' || self.validate_shopper_id!(shopperId))
+    end
+
     def self.has_valid_user_supplied_id?(params)
       userSuppliedId = (params.respond_to? :keys) ? self.get_user_supplied_id(params) : false
       userSuppliedId && self.validate_user_supplied_id!(userSuppliedId)

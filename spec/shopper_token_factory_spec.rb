@@ -35,6 +35,13 @@ RSpec.describe Lightrail::ShopperTokenFactory do
       expect(decoded[0]['g']['cui']).to eq(example_user_supplied_id)
     end
 
+    it "generates an unauthenticated JWT with shopper_id = empty string" do
+      token = factory.generate({shopper_id: ''})
+      decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
+
+      expect(decoded[0]['g']['shi']).to eq('')
+    end
+
     it "correctly applies the specified validity period" do
       token = factory.generate({shopper_id: example_shopper_id}, 12)
       decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
