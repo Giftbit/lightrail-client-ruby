@@ -108,6 +108,31 @@ RSpec.describe Lightrail::Contact do
         expect(contact_id_result).to be(nil)
       end
     end
+
+    describe ".retrieve_or_create_by_shopper_id" do
+      it "returns existing contact if there is one" do
+        expect(lightrail_connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/contacts\?userSuppliedId=#{example_shopper_id}/)
+                    .and_return({"contacts" => [{"userSuppliedId" => "this-is-a-shopper-id"}]})
+        contact_result = contact.retrieve_or_create_by_shopper_id(example_shopper_id)
+        expect(contact_result['userSuppliedId']).to eq(example_shopper_id)
+      end
+
+      it "creates new contact if one does not exist" do
+        expect(lightrail_connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/contacts\?userSuppliedId=this-is-a-shopper-id/)
+                    .and_return({"contacts" => []})
+        expect(lightrail_connection)
+            .to receive(:make_post_request_and_parse_response)
+                    .with(/contacts/, hash_including({userSuppliedId: example_shopper_id}))
+                    .and_return({"contact" => {"userSuppliedId" => example_shopper_id}})
+
+        contact_result = contact.retrieve_or_create_by_shopper_id(example_shopper_id)
+        expect(contact_result['userSuppliedId']).to be(example_shopper_id)
+      end
+    end
   end
 
 end

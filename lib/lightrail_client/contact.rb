@@ -20,6 +20,14 @@ module Lightrail
 
     # Utility methods
 
+    def self.retrieve_or_create_by_shopper_id(shopper_id)
+      contact = self.retrieve_by_shopper_id(shopper_id)
+      if !contact
+        contact = self.create({shopper_id: shopper_id})
+      end
+      contact
+    end
+
     def self.get_contact_id_from_id_or_shopper_id(charge_params)
       if Lightrail::Validator.has_valid_contact_id?(charge_params)
         return Lightrail::Validator.get_contact_id(charge_params)
