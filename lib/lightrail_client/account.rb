@@ -2,7 +2,32 @@ module Lightrail
   class Account < Lightrail::LightrailObject
     def self.create(account_params)
       validated_params = Lightrail::Validator.set_params_for_account_create!(account_params)
-      response = Lightrail::Connection.send :make_post_request_and_parse_response, "cards", validated_params
+
+      # Make sure contact exists first
+      contact_id = Lightrail::Validator.get_contact_id(account_params)
+      shopper_id = Lightrail::Validator.get_shopper_id(account_params)
+
+      if contact_id
+        contact = Lightrail::Contact.retrieve_by_contact_id(contact_id)
+        if shopper_id && (contact['userSuppliedId'] != shopper_id)
+          raise Lightrail::LightrailArgumentError.new("Account creation error: you've specified two different contacts to attach this account to.")
+        end
+
+      elsif shopper_id
+        contact = Lightrail::Contact.retrieve_or_create_by_shopper_id(shopper_id)
+      end
+
+      if !contact
+        raise Lightrail::LightrailArgumentError.new("Account creation error: could not get or create the specified contact. Params: #{account_params}")
+      end
+
+      # If the contact already has an account in that currency, return it
+      account_card = Lightrail::Account.retrieve({contact_id: contact['contactId'], currency: account_params[:currency]})
+      return account_card['cardId'] if account_card
+
+      params_with_contact_id = validated_params.clone
+      params_with_contact_id[:contactId] = contact['contactId']
+      response = Lightrail::Connection.send :make_post_request_and_parse_response, "cards", params_with_contact_id
       response['card']
     end
 
