@@ -35,8 +35,6 @@ Scenario: .create
 
 
 Scenario: .create
-    Given an API key such as 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJnIjp7Imd1aSI6Imdvb2V5IiwiZ21pIjoiZ2VybWllIn19.XxOjDsluAw5_hdf5scrLk0UBn8VlhT-3zf5ZeIkEld8' and a shared secret such as 'secret'
-
     When I generate a shopper token with shopperId 'this-is-a-shopper-id', the decoded token should include
     """
     {"shi":"this-is-a-shopper-id","gui":"gooey","gmi":"germie"}

@@ -77,6 +77,6 @@ When(/I generate a shopper token with shopperId '(.+)', the decoded token should
 
   token = Lightrail::ShopperTokenFactory.generate({shopper_id: shopperId})
   decoded = JWT.decode(token, @example_shared_secret, true, {algorithm: 'HS256'})
-  expect(decoded[0]['g']['shi']).to eq(@example_shopper_id)
-# expect(decoded[0]['g']).to include_json(tokenBody)
+
+  expect(JSON.generate(decoded[0]['g'])).to be_json_eql(tokenBody)
 end
