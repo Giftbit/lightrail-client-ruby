@@ -1,6 +1,7 @@
 require "bundler/setup"
 require "lightrail_client"
 require "pry"
+require "json_spec"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
