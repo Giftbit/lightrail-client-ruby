@@ -5,8 +5,8 @@ Before do
   @example_contact_id = 'this-is-a-contact-id'
   @example_user_supplied_id = 'this-is-a-user-supplied-id'
 
-  # allow(Lightrail).to receive(:api_key).and_return(@example_api_key)
-  # allow(Lightrail).to receive(:shared_secret).and_return(@example_shared_secret)
+  allow(Lightrail).to receive(:api_key).and_return(@example_api_key)
+  allow(Lightrail).to receive(:shared_secret).and_return(@example_shared_secret)
 end
 
 Then(/generates a JWT with the supplied shopper_id '(.+)'/) do |shopperId|
@@ -29,23 +29,22 @@ Then(/generates a JWT with the supplied contact user_supplied_id '(.+)'/) do |us
 end
 
 Then(/correctly applies the specified validity period '(.+)'/) do |validity_period|
-  token = Lightrail::ShopperTokenFactory.generate({shopper_id: @example_shopper_id}, validity_period)
+  token = Lightrail::ShopperTokenFactory.generate({shopper_id: @example_shopper_id}, validity_period.to_i)
   decoded = JWT.decode(token, @example_shared_secret, true, {algorithm: 'HS256'})
-
-  expect(decoded[0]['exp']).to eq(decoded[0]['iat'] + 12)
+  expect(decoded[0]['exp']).to eq(decoded[0]['iat'] + validity_period.to_i)
 end
 
-# Then(/includes 'iat'/) do
-#   token = Lightrail::ShopperTokenFactory.generate({shopper_id: @example_shopper_id})
-#   decoded = JWT.decode(token, @example_shared_secret, true, {algorithm: 'HS256'})
-#   expect(decoded[0]['iat']).to be_a(Integer)
-# end
-#
-# Then(/includes 'iss: MERCHANT'/) do
-#   token = Lightrail::ShopperTokenFactory.generate({shopper_id: @example_shopper_id})
-#   decoded = JWT.decode(token, @example_shared_secret, true, {algorithm: 'HS256'})
-#   expect(decoded[0]['iss']).to eq("MERCHANT")
-# end
+Then(/includes 'iat'/) do
+  token = Lightrail::ShopperTokenFactory.generate({shopper_id: @example_shopper_id})
+  decoded = JWT.decode(token, @example_shared_secret, true, {algorithm: 'HS256'})
+  expect(decoded[0]['iat']).to be_a(Integer)
+end
+
+Then(/includes 'iss: MERCHANT'/) do
+  token = Lightrail::ShopperTokenFactory.generate({shopper_id: @example_shopper_id})
+  decoded = JWT.decode(token, @example_shared_secret, true, {algorithm: 'HS256'})
+  expect(decoded[0]['iss']).to eq("MERCHANT")
+end
 
 
 Given(/an API key such as '(.+)'/) do |api_key|
@@ -70,13 +69,26 @@ end
 
 #####
 
+When(/I generate a shopper token the decoded token should include \/(.+)\//) do |thingToInclude|
+  token = Lightrail::ShopperTokenFactory.generate({shopper_id: @example_shopper_id})
+  decoded = JWT.decode(token, @example_shared_secret, true, {algorithm: 'HS256'})
+
+  expect(JSON.generate(decoded)).to include_json(thingToInclude)
+end
+
 When(/I generate a shopper token with shopperId '(.+)', the decoded token should include/) do |shopperId, tokenBody|
 # When(/generate a shopper token with shopperId '(.+)', the decoded token should include: """(.+)""" and also """(.+)""" and also """(.+)"""/) do |shopperId, tokenBody, iss, alg|
-  allow(Lightrail).to receive(:api_key).and_return(@example_api_key)
-  allow(Lightrail).to receive(:shared_secret).and_return(@example_shared_secret)
 
   token = Lightrail::ShopperTokenFactory.generate({shopper_id: shopperId})
   decoded = JWT.decode(token, @example_shared_secret, true, {algorithm: 'HS256'})
 
-  expect(JSON.generate(decoded[0]['g'])).to be_json_eql(tokenBody)
+  expect(JSON.generate(decoded[0])).to include_json(tokenBody)
 end
+
+When(/I generate a shopper token with contactId '(.+)', the decoded token should include/) do |contactId, tokenBody|
+  token = Lightrail::ShopperTokenFactory.generate({contact_id: contactId})
+  decoded = JWT.decode(token, @example_shared_secret, true, {algorithm: 'HS256'})
+
+  expect(JSON.generate(decoded[0])).to include_json(tokenBody)
+end
+
