@@ -17,10 +17,6 @@ module Lightrail
         contact = Lightrail::Contact.retrieve_or_create_by_shopper_id(shopper_id)
       end
 
-      if !contact
-        raise Lightrail::LightrailArgumentError.new("Account creation error: could not get or create the specified contact. Params: #{account_params}")
-      end
-
       # If the contact already has an account in that currency, return it
       account_card = Lightrail::Account.retrieve({contact_id: contact['contactId'], currency: account_params[:currency]})
       return account_card['cardId'] if account_card

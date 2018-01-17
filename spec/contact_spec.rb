@@ -132,6 +132,22 @@ RSpec.describe Lightrail::Contact do
         contact_result = contact.retrieve_or_create_by_shopper_id(example_shopper_id)
         expect(contact_result['userSuppliedId']).to be(example_shopper_id)
       end
+
+      describe "error handling" do
+        it "throws an error if the contact could not be created" do
+          expect(lightrail_connection)
+              .to receive(:make_get_request_and_parse_response)
+                      .with(/contacts\?userSuppliedId=this-is-a-shopper-id/)
+                      .and_return({"contacts" => []})
+          expect(lightrail_connection)
+              .to receive(:make_post_request_and_parse_response)
+                      .with(/contacts/, hash_including({userSuppliedId: example_shopper_id}))
+                      .and_raise(Lightrail::AuthorizationError.new('Unauthorized', Faraday::Response.new(status: 401, body: "{\"status\":401}")))
+
+          expect {contact.retrieve_or_create_by_shopper_id(example_shopper_id)}.to raise_error(Lightrail::AuthorizationError)
+
+        end
+      end
     end
   end
 
