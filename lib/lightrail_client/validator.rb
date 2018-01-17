@@ -69,7 +69,7 @@ module Lightrail
       begin
         return validated_params if ((validated_params.is_a? Hash) &&
             self.set_userSuppliedId_from_existing!(validated_params, validated_params) &&
-            self.set_contactId_from_contact_or_shopper_id!(validated_params, validated_params) &&
+            (self.has_valid_shopper_id?(validated_params) || self.has_valid_contact_id?(validated_params)) &&
             self.validate_currency!(validated_params[:currency]) &&
             Lightrail::Account.set_account_card_type(validated_params))
       rescue Lightrail::LightrailArgumentError

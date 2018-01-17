@@ -54,6 +54,10 @@ RSpec.describe Lightrail::Account do
                   .with(/contacts\?userSuppliedId=#{example_shopper_id}/)
                   .and_return({"contacts" => [{"contactId" => example_contact_id}]})
       expect(lightrail_connection)
+          .to receive(:make_get_request_and_parse_response)
+                  .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
+                  .and_return({"cards" => []})
+      expect(lightrail_connection)
           .to receive(:make_post_request_and_parse_response)
                   .with(/cards/, hash_including(:cardType => 'ACCOUNT_CARD', :contactId => example_contact_id, :userSuppliedId => 'this-is-a-new-account'))
                   .and_return({"card" => {}})
@@ -62,10 +66,40 @@ RSpec.describe Lightrail::Account do
 
     it "creates a new account given a contactId & currency" do
       expect(lightrail_connection)
+          .to receive(:make_get_request_and_parse_response)
+                  .with(/contacts\/#{example_contact_id}/)
+                  .and_return({"contact" => {"contactId" => example_contact_id}})
+      expect(lightrail_connection)
+          .to receive(:make_get_request_and_parse_response)
+                  .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
+                  .and_return({"cards" => []})
+      expect(lightrail_connection)
           .to receive(:make_post_request_and_parse_response)
                   .with(/cards/, hash_including(:cardType => 'ACCOUNT_CARD', :contactId => example_contact_id, :userSuppliedId => 'this-is-a-new-account'))
                   .and_return({"card" => {}})
       account.create(create_account_params_with_contact_id)
+    end
+
+    it "creates a contact first if one doesn't already exist" do
+      expect(lightrail_connection)
+          .to receive(:make_get_request_and_parse_response)
+                  .with(/contacts\?userSuppliedId=this-is-a-shopper-id/)
+                  .and_return({"contacts" => []})
+      expect(lightrail_connection)
+          .to receive(:make_post_request_and_parse_response)
+                  .with(/contacts/, hash_including({userSuppliedId: example_shopper_id}))
+                  .and_return({"contact" => {"userSuppliedId" => example_shopper_id, "contactId" => example_contact_id}})
+
+      expect(lightrail_connection)
+          .to receive(:make_get_request_and_parse_response)
+                  .with(/cards\?cardType=ACCOUNT_CARD\&contactId=#{example_contact_id}\&currency=#{example_currency}/)
+                  .and_return({"cards" => []})
+      expect(lightrail_connection)
+          .to receive(:make_post_request_and_parse_response)
+                  .with(/cards/, hash_including({:cardType => 'ACCOUNT_CARD', :contactId => 'this-is-a-contact-id', :userSuppliedId => 'this-is-a-new-account'}))
+                  .and_return({"card" => {}})
+
+      account.create(create_account_params_with_shopper_id)
     end
 
     describe "error handling" do

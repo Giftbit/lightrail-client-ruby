@@ -108,6 +108,47 @@ RSpec.describe Lightrail::Contact do
         expect(contact_id_result).to be(nil)
       end
     end
+
+    describe ".retrieve_or_create_by_shopper_id" do
+      it "returns existing contact if there is one" do
+        expect(lightrail_connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/contacts\?userSuppliedId=#{example_shopper_id}/)
+                    .and_return({"contacts" => [{"userSuppliedId" => "this-is-a-shopper-id"}]})
+        contact_result = contact.retrieve_or_create_by_shopper_id(example_shopper_id)
+        expect(contact_result['userSuppliedId']).to eq(example_shopper_id)
+      end
+
+      it "creates new contact if one does not exist" do
+        expect(lightrail_connection)
+            .to receive(:make_get_request_and_parse_response)
+                    .with(/contacts\?userSuppliedId=this-is-a-shopper-id/)
+                    .and_return({"contacts" => []})
+        expect(lightrail_connection)
+            .to receive(:make_post_request_and_parse_response)
+                    .with(/contacts/, hash_including({userSuppliedId: example_shopper_id}))
+                    .and_return({"contact" => {"userSuppliedId" => example_shopper_id}})
+
+        contact_result = contact.retrieve_or_create_by_shopper_id(example_shopper_id)
+        expect(contact_result['userSuppliedId']).to be(example_shopper_id)
+      end
+
+      describe "error handling" do
+        it "throws an error if the contact could not be created" do
+          expect(lightrail_connection)
+              .to receive(:make_get_request_and_parse_response)
+                      .with(/contacts\?userSuppliedId=this-is-a-shopper-id/)
+                      .and_return({"contacts" => []})
+          expect(lightrail_connection)
+              .to receive(:make_post_request_and_parse_response)
+                      .with(/contacts/, hash_including({userSuppliedId: example_shopper_id}))
+                      .and_raise(Lightrail::AuthorizationError.new('Unauthorized', Faraday::Response.new(status: 401, body: "{\"status\":401}")))
+
+          expect {contact.retrieve_or_create_by_shopper_id(example_shopper_id)}.to raise_error(Lightrail::AuthorizationError)
+
+        end
+      end
+    end
   end
 
 end
