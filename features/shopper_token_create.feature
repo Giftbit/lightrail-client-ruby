@@ -43,3 +43,7 @@ Scenario: .create
     """
     {"coi":"this-is-a-contact-id","gui":"gooey","gmi":"germie"}
     """
+
+
+
+    When I generate a shopper token with contact identifier ''

@@ -92,3 +92,20 @@ When(/I generate a shopper token with contactId '(.+)', the decoded token should
   expect(JSON.generate(decoded[0])).to include_json(tokenBody)
 end
 
+
+##########
+
+When(/I generate a shopperToken with contact identifier type '(.+)' and identifer '(.+)' and validity period '(.+)'/) do |contactIdentifierType, contactIdentifierValue, validityPeriod|
+  # @contactIdentifierType = contactIdentifierType
+  # @contactIdentifierValue = contactIdentifierValue
+  # @validityPeriod = validityPeriod
+  binding.pry
+  @token = Lightrail::ShopperTokenFactory.generate({:"#{contactIdentifierType}" => contactIdentifierValue}, validityPeriod)
+end
+
+Then(/the contact identifier of type '(.+)' should be '(.+)' and the validity period should be '(.+)'/) do |decodedType, decodedContactIdentifier, validity|
+  decoded = JWT.decode(@token, @example_shared_secret, true, {algorithm: 'HS256'})
+  expect(decoded[0][decodedType]).to eq(decodedContactIdentifier)
+  # expect(decoded[0][decodedType]).to eq(decodedContactIdentifier)
+end
+
