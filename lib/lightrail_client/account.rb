@@ -10,7 +10,7 @@ module Lightrail
       if contact_id
         contact = Lightrail::Contact.retrieve_by_contact_id(contact_id)
         if shopper_id && (contact['userSuppliedId'] != shopper_id)
-          raise Lightrail::LightrailArgumentError.new("Account creation error: you've specified two different contacts to attach this account to.")
+          raise Lightrail::LightrailArgumentError.new("Account creation error: you've specified both a contactId and a shopperId for this account, but the contact with that contactId has a different shopperId.")
         end
 
       elsif shopper_id
