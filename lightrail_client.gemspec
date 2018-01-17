@@ -37,6 +37,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "cucumber", "~>3.1"
   spec.add_development_dependency "dotenv", "~>2.2"
   spec.add_development_dependency "rspec-expectations"
+  spec.add_development_dependency "json_spec"
 
   spec.add_runtime_dependency "faraday", "~>0.12"
   spec.add_runtime_dependency "json", "~>1.7"
