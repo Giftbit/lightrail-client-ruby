@@ -1,4 +1,4 @@
-# Lightrail Client Gem (beta)
+# Lightrail Client Gem
 
 Lightrail is a modern platform for digital account credits, gift cards, promotions, and points (to learn more, visit [Lightrail](https://www.lightrail.com/)). The Lightrail Client Gem is a basic library for developers to easily connect with the Lightrail API using Ruby. If you are looking for specific use cases or other languages, check out the complete list of all [Lightrail libraries and integrations](https://github.com/Giftbit/Lightrail-API-Docs/blob/master/docs/client-libraries.md).
 
@@ -273,10 +273,10 @@ gift_fund = Lightrail::Card.fund({
 
 ## Installation
 
-This gem is in alpha mode and is not yet available on RubyGems. You can use it in your project by adding this line to your application's Gemfile:
+This gem is available on RubyGems.org. To use it in your project, add this line to your application's Gemfile:
 
 ```ruby
-gem 'lightrail_client', :git => 'https://github.com/Giftbit/lightrail-client-ruby.git'
+gem 'lightrail_client'
 ```
 
 And then execute:
