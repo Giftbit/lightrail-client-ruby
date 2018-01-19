@@ -1,0 +1,46 @@
+{
+  "shopperId": "this-is-a-shopper-id",
+  "contactId": "this-is-a-contact-id",
+  "userSuppliedId": "this-is-a-user-supplied-id",
+  "accountCardId": "this-is-an-account-card-id",
+  "cardId": "this-is-a-card-id",
+  "currency": "ABC",
+  "endpoints": {
+    "contacts": "contacts",
+    "contactsSearch": "contacts?",
+    "cards": "cards",
+    "cardsSearch": "cards?",
+    "accountCardsSearch": "cards?cardType=ACCOUNT_CARD"
+  },
+  "jsonResponses": {
+    "contactsSearchOneResult": {
+      "contacts": [
+        {
+          "contactId": "this-is-a-contact-id"
+        }
+      ]
+    },
+    "contactResult": {
+      "contactId": "this-is-a-contact-id"
+    },
+    "contactsSearchNoResults": {
+      "cards": []
+    },
+    "accountCardsSearchOneResult": {
+      "cards": [
+        {
+          "cardId": "",
+          "cardType": "ACCOUNT_CARD"
+        }
+      ]
+    },
+    "accountCardsSearchNoResults": {
+      "cards": []
+    },
+    "accountCard": {
+      "cardId": "this-is-a-card-id",
+      "contactId": "this-is-a-contact-id",
+      "userSuppliedId": "this-is-a-user-supplied-id"
+    }
+  }
+}
