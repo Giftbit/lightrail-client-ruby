@@ -66,5 +66,5 @@ Scenario:
         | parameters                                      | httpMethods    | endpoints                                              | jsonResponses                                                      |
         | shopperId, currency, userSuppliedId             | get, get, post | contactsSearch, accountCardsSearch, cards | contactsSearchOneResult, accountCardsSearchNoResults, accountCard |
         | contactId, currency, userSuppliedId             | get, get, post | contacts, accountCardsSearch, cards       | contactResult, accountCardsSearchNoResults, accountCard |
-        | userSuppliedId, currency, userSuppliedId | get, get, post | contactsSearch, accountCardsSearch, cards | contactsSearchOneResult, accountCardsSearchNoResults, accountCard |
+#        | userSuppliedId, currency, userSuppliedId | get, get, post | contactsSearch, accountCardsSearch, cards | contactsSearchOneResult, accountCardsSearchNoResults, accountCard |
 

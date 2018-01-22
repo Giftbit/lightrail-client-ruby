@@ -21,7 +21,9 @@
       ]
     },
     "contactResult": {
-      "contactId": "this-is-a-contact-id"
+      "contact": {
+        "contactId": "this-is-a-contact-id"
+      }
     },
     "contactsSearchNoResults": {
       "contacts": []
@@ -38,9 +40,11 @@
       "cards": []
     },
     "accountCard": {
-      "cardId": "this-is-a-card-id",
-      "contactId": "this-is-a-contact-id",
-      "userSuppliedId": "this-is-a-user-supplied-id"
+      "card": {
+        "cardId": "this-is-a-card-id",
+        "contactId": "this-is-a-contact-id",
+        "userSuppliedId": "this-is-a-user-supplied-id"
+      }
     }
   }
 }

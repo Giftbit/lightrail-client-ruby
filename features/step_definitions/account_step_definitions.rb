@@ -179,15 +179,15 @@ shopperId,
 
   expect(Lightrail::Connection)
       .to receive("make_#{method1}_request_and_parse_response".to_sym)
-              .with(Regexp.new(variables['endpoints'][endpoint1]))
+              .with(Regexp.new(Regexp.escape(variables['endpoints'][endpoint1])))
               .and_return(variables['jsonResponses'][response1])
   expect(Lightrail::Connection)
       .to receive("make_#{method2}_request_and_parse_response".to_sym)
-              .with(Regexp.new(variables['endpoints'][endpoint2]))
+              .with(Regexp.new(Regexp.escape(variables['endpoints'][endpoint2])))
               .and_return(variables['jsonResponses'][response2])
   expect(Lightrail::Connection)
       .to receive("make_#{method3}_request_and_parse_response".to_sym)
-              .with(Regexp.new(variables['endpoints'][endpoint3]))
+              .with(Regexp.new(Regexp.escape(variables['endpoints'][endpoint3])), anything)
               .and_return(variables['jsonResponses'][response3])
 
   Lightrail::Account.create({
@@ -207,28 +207,25 @@ Given(/creating an account with/) do |table|
   table.hashes.each do |row|
 
     # refactor this...
-    params = row['parameters'].split(', ').map {|key| variables[key]}
+    paramKeys = row['parameters'].split(', ')
+    params = paramKeys.map {|key| variables[key]}
 
     methods = row['httpMethods'].split(', ')
 
     endpoints = row['endpoints'].split(', ').map {|key| variables['endpoints'][key]}
 
     json_responses_keys = row['jsonResponses'].split(', ')
-    responses = json_responses_keys.map {|key| variables['jsonResponses'][key]}
+    # responses = json_responses_keys.map {|key| variables['jsonResponses'][key]}
 
 
     methods.each_with_index do |method, index|
-      # binding.pry
-      print "INDEX #{index}: method #{method}\n"
       method == 'get' ?
           expect_to_get_endpoint_and_receive_result_with_params(endpoints[index], json_responses_keys[index], params) :
           expect_to_post_to_endpoint_and_receive_result_with_params(endpoints[index], json_responses_keys[index], params)
 
     end
 
-    Lightrail::Account.create({shopper_id: params[0], currency: params[1], user_supplied_id: params[2]})
-
-    break
+    Lightrail::Account.create({(paramKeys[0]).to_sym => params[0], currency: params[1], user_supplied_id: params[2]})
   end
 
 
