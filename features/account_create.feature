@@ -64,7 +64,7 @@ Scenario:
      * creating an account with <parameters> should result in calling <endpoints> with <httpMethod> and corresponding <jsonResponses>
 
         | parameters                                      | httpMethods    | endpoints                                              | jsonResponses                                                      |
-        | shopperId, currency, userSuppliedId             | get, get, post | contactsSearch, accountCardsSearch, cards | contactsSearchOneResult, accountCardsSearchNoResults, accountCardsCreateSuccess |
-        | contactId, currency, userSuppliedId             | get, get, post | contacts, accountCardsSearch, cards       | contactResult, accountCardsSearchNoResults, accountCardsCreateSuccess           |
-        | userSuppliedId, currency, userSuppliedId | get, get, post | contactsSearch, accountCardsSearch, cards | contactsSearchOneResult, accountCardsSearchNoResults, accountCardsCreateSuccess |
+        | shopperId, currency, userSuppliedId             | get, get, post | contactsSearch, accountCardsSearch, cards | contactsSearchOneResult, accountCardsSearchNoResults, accountCard |
+        | contactId, currency, userSuppliedId             | get, get, post | contacts, accountCardsSearch, cards       | contactResult, accountCardsSearchNoResults, accountCard |
+        | userSuppliedId, currency, userSuppliedId | get, get, post | contactsSearch, accountCardsSearch, cards | contactsSearchOneResult, accountCardsSearchNoResults, accountCard |
 

@@ -24,7 +24,7 @@
       "contactId": "this-is-a-contact-id"
     },
     "contactsSearchNoResults": {
-      "cards": []
+      "contacts": []
     },
     "accountCardsSearchOneResult": {
       "cards": [

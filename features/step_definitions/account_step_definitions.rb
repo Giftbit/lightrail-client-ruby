@@ -220,8 +220,13 @@ Given(/creating an account with/) do |table|
     methods.each_with_index do |method, index|
       # binding.pry
       print "INDEX #{index}: method #{method}\n"
-      step "expect to #{method} endpoint #{endpoints[index]} and receive #{json_responses_keys[index]}: params #{params}"
+      method == 'get' ?
+          expect_to_get_endpoint_and_receive_result_with_params(endpoints[index], json_responses_keys[index], params) :
+          expect_to_post_to_endpoint_and_receive_result_with_params(endpoints[index], json_responses_keys[index], params)
+
     end
+
+    Lightrail::Account.create({shopper_id: params[0], currency: params[1], user_supplied_id: params[2]})
 
     break
   end
@@ -230,90 +235,20 @@ Given(/creating an account with/) do |table|
 end
 
 
-Then(/^expect to get endpoint (.+) and receive (.+): params (.+)$/) do |endpoint, json_response_key, params|
+def expect_to_get_endpoint_and_receive_result_with_params(endpoint, json_response_key, params)
   variables = JSON.parse(File.open("features/variables.json").read)
-
-  # puts endpoint, json_response_key, params
-  # puts variables['jsonResponses'][json_response_key]
 
   expect(Lightrail::Connection)
       .to receive(:make_get_request_and_parse_response)
-              .with(Regexp.new(endpoint))
+              .with(Regexp.new(Regexp.escape(endpoint)))
               .and_return(variables['jsonResponses'][json_response_key])
 end
-Then(/^expect to post endpoint (.+) and receive (.+): params (.+)$/) do |endpoint, json_response_key, params|
 
+def expect_to_post_to_endpoint_and_receive_result_with_params(endpoint, json_response_key, params)
   variables = JSON.parse(File.open("features/variables.json").read)
-
-  params = JSON.parse(params)
-  # puts endpoint, json_response_key, params
-  # puts variables['jsonResponses'][json_response_key]
 
   expect(Lightrail::Connection)
       .to receive(:make_post_request_and_parse_response)
-              .with(Regexp.new(endpoint))
+              .with(Regexp.new(Regexp.escape(endpoint)), anything)
               .and_return(variables['jsonResponses'][json_response_key])
-  print "CREATING ACCOUNT\n"
-  Lightrail::Account.create({shopper_id: params[0], currency: params[1], user_supplied_id: params[2]})
 end
-
-# table.hashes.each do |row|
-#     row.each do |param, http_method, endpoint, json_response|
-#         step "expect to #{http_method} #{endpoint} and receive #{json_response}"
-#         # becomes "expect to get /contacts and receive {'contactId' => 'contact-be-here'}"
-#         #         "expect to get /cards?cardType=ACCOUNT_CARD and receive {'cards' => []}"
-#         # ...etc
-#     end
-# end
-
-# step ""
-
-
-####
-####
-#### NONSENSE TEST CODE
-####
-####
-
-
-# arr = ['cat', 'dog', 'pony', 'bird']
-# arr2 = [['ant', 'bee'], ['mosquito', 'centipede']]
-# arr2.each_with_index do |subarr, idx|
-#   subarr.each do |str|
-#     puts str.upcase
-#     puts 'ARR1', arr
-#   end
-# end
-#
-#
-# arr = ['cat', 'dog', 'pony', 'bird']
-# arr2 = [['ant', 'bee'], ['mosquito', 'centipede']]
-# arr2.each_with_index do |subarr, index|
-#   puts "INDEX #{index}: #{subarr[index].upcase}"
-#   puts "expect #{subarr} to correspond to #{arr[index]}"
-#   break
-# end
-#
-#
-# # within a row (looping through rows, in one row's loop)
-# methods = ["get", "get", "post"]
-# endpoints = ["contacts?", "cards?cardType=ACCOUNT_CARD", "cards"]
-# json_responses_keys =["contactsSearchOneResult", "accountCardsSearchNoResults", "accountCardsCreateSuccess"]
-# params = ["this-is-a-shopper-id", "ABC", "this-is-a-user-supplied-id"]
-#
-# methods.each_with_index do |method, index|
-#   print "INDEX #{index}: #{method}\n"
-#   print "expect to #{method} endpoint #{endpoints[index]} and receive #{json_responses_keys[index]}: params #{params}\n"
-# end
-
-# SHOULD OUTPUT
-#
-# INDEX 0: get
-# expect to get endpoint contacts? and receive contactsSearchOneResult: params ["this-is-a-shopper-id", "ABC", "this-is-a-user-supplied-id"]
-# INDEX 1: get
-# expect to get endpoint cards?cardType=ACCOUNT_CARD and receive accountCardsSearchNoResults: params ["this-is-a-shopper-id", "ABC", "this-is-a-user-supplied-id"]
-# INDEX 2: post
-# expect to post endpoint cards and receive accountCardsCreateSuccess: params ["this-is-a-shopper-id", "ABC", "this-is-a-user-supplied-id"]
-#
-# INSTEAD OUTPUTS
-# ["get", "get", "post"]   # ie, just 'methods'
