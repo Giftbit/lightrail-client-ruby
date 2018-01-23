@@ -1,7 +1,7 @@
 Feature: Account Card
 
 
-@account_creation
+@account_creation @by_shopper_id
 
 Scenario: Create by shopperId
 When a contact exists but has no account: requires minimum parameters [shopperId, currency, userSuppliedId] and makes the following REST requests: [contactsSearchOneResult, accountCardSearchNoResults, accountCardCreate]
@@ -11,11 +11,15 @@ When a contact exists and has an account: requires minimum parameters [shopperId
 When a contact doesn't exist: requires minimum parameters [shopperId, currency, userSuppliedId] and makes the following REST requests: [contactsSearchNoResults, contactCreate, accountCardSearchNoResults, accountCardCreate]
 
 
+@account_creation @by_contact_id
+
 Scenario: Create by contactId
 When a contact exists but has no account: requires minimum parameters [contactId, currency, userSuppliedId] and makes the following REST requests: [contactGet, accountCardSearchNoResults, accountCardCreate]
 
 When a contact exists and has an account: requires minimum parameters [contactId, currency, userSuppliedId] and makes the following REST requests: [contactGet, accountCardSearchOneResult]
 
+
+@account_creation @by_contact_id
 
 Scenario: Create by contactId - expecting errors
 When a contact doesn't exist: requires minimum parameters [contactId, currency, userSuppliedId] and makes the following REST requests: [contactsError404] and throws the following error: [CouldNotFindObjectError]
