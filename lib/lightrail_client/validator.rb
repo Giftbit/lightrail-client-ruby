@@ -64,7 +64,7 @@ module Lightrail
     end
 
     def self.set_params_for_account_create!(create_account_params)
-      validated_params = create_account_params.clone
+      validated_params = self.transform_keys_to_symbols(create_account_params.clone)
 
       begin
         return validated_params if ((validated_params.is_a? Hash) &&
@@ -311,6 +311,14 @@ module Lightrail
     def self.get_or_create_user_supplied_id_with_action_suffix(charge_params, new_user_supplied_id_base, action_suffix)
       user_supplied_id_key = (charge_params.keys & Lightrail::Constants::LIGHTRAIL_USER_SUPPLIED_ID_KEYS).first
       charge_params[user_supplied_id_key] || "#{new_user_supplied_id_base}-#{action_suffix}"
+    end
+
+    # UTILITY
+    # take keys of hash and transform those to a symbols
+    def self.transform_keys_to_symbols(value)
+      return value if not value.is_a?(Hash)
+      hash = value.inject({}) {|memo, (k, v)| memo[k.to_sym] = self.transform_keys_to_symbols(v); memo}
+      return hash
     end
 
   end
