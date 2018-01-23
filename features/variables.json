@@ -46,5 +46,82 @@
         "userSuppliedId": "this-is-a-user-supplied-id"
       }
     }
+  },
+  "requestResponseCombos": {
+    "contactsSearchNoResults": {
+      "httpMethod": "get",
+      "endpoint": "contacts?",
+      "response": {
+        "contacts": []
+      }
+    },
+    "contactsSearchOneResult": {
+      "httpMethod": "get",
+      "endpoint": "contacts?",
+      "response": {
+        "contacts": [
+          {
+            "contactId": "this-is-a-contact-id"
+          }
+        ]
+      }
+    },
+    "contactGet": {
+      "httpMethod": "get",
+      "endpoint": "contacts",
+      "response": {
+        "contact": {
+          "contactId": "this-is-a-contact-id"
+        }
+      }
+    },
+    "contactCreate": {
+      "httpMethod": "post",
+      "endpoint": "contacts",
+      "response": {
+        "contact": {
+          "contactId": "this-is-a-contact-id"
+        }
+      }
+    },
+    "accountCardSearchNoResults": {
+      "httpMethod": "get",
+      "endpoint": "cards?cardType=ACCOUNT_CARD",
+      "response": {
+        "cards": []
+      }
+    },
+    "accountCardSearchOneResult": {
+      "httpMethod": "get",
+      "endpoint": "cards?cardType=ACCOUNT_CARD",
+      "response": {
+        "cards": [
+          {
+            "cardId": "this-is-a-card-id"
+          }
+        ]
+      }
+    },
+    "accountCardGet": {
+      "httpMethod": "get",
+      "endpoint": "cards/",
+      "response": {
+        "card": {
+          "cardId": "this-is-a-card-id"
+        }
+      }
+    },
+    "accountCardCreate": {
+      "httpMethod": "post",
+      "endpoint": "cards",
+      "response": {
+        "card": {
+          "cardId": "this-is-a-card-id",
+          "cardType": "ACCOUNT_CARD",
+          "contactId": "this-is-a-contact-id",
+          "currency": "ABC"
+        }
+      }
+    }
   }
 }
