@@ -1,7 +1,6 @@
 @variables = JSON.parse(File.open("features/variables.json").read)
 
-When(/^a contact exists but has no account: requires minimum parameters \[(.+)\] and makes the following rest requests: \[(.+)\]$/) do |minimum_params, expectedRequestsAndResponses|
-  binding.pry
+When(/^a contact exists .+: requires minimum parameters \[(.+)\] and makes the following REST requests: \[(.+)\]$/) do |minimum_params, expectedRequestsAndResponses|
   @variables = JSON.parse(File.open("features/variables.json").read)
 
   min_param_keys = minimum_params.split(', ')
