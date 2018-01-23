@@ -122,6 +122,19 @@
           "currency": "ABC"
         }
       }
+    },
+    "contactsError404": {
+      "httpMethod": "get",
+      "endpoint": "contacts/",
+      "response": {
+        "status": 404,
+        "message": "Couldn't find the contact",
+        "messageCode": "SomeContactNotFound"
+      }
     }
+  },
+  "errorNames": {
+    "LightrailArgumentError": "LightrailArgumentError",
+    "CouldNotFindObjectError": "CouldNotFindObjectError"
   }
 }
