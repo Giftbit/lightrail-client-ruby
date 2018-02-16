@@ -4,6 +4,7 @@ module Lightrail
       conn = Faraday.new Lightrail.api_base, ssl: {version: :TLSv1_2}
       conn.headers['Content-Type'] = 'application/json; charset=utf-8'
       conn.headers['Authorization'] = "Bearer #{Lightrail.api_key}"
+      conn.headers['User-Agent'] = "Lightrail-Ruby/#{Gem.loaded_specs['lightrail_client'].version.version}"
       conn
     end
 

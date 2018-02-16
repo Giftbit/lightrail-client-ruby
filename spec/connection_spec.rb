@@ -14,6 +14,7 @@ RSpec.describe Lightrail::Connection do
       expect(conn.headers['Content-Type']).to include('application/json'), "expected Content-Type header to include 'application/json'"
       expect(conn.headers['Content-Type']).to include('charset=utf-8'), "expected Content-Type header to include 'charset=utf-8'"
       expect(conn.headers['Authorization']).to include('Bearer'), "expected Authorization header to include 'Bearer'"
+      expect(conn.headers['User-Agent']).to include('Lightrail-Ruby'), "expected User-Agent header to include 'Lightrail-Ruby'"
     end
   end
 
