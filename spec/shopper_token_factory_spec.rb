@@ -35,6 +35,18 @@ RSpec.describe Lightrail::ShopperTokenFactory do
       expect(decoded[0]['g']['cui']).to eq(example_user_supplied_id)
     end
 
+    it "generates a JWT with metadata" do
+      token = factory.generate({user_supplied_id: example_user_supplied_id}, {metadata: {foo: "bar"}, validity_in_seconds: 666})
+      decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
+
+      expect(decoded[0]['g']['cui']).to eq(example_user_supplied_id)
+      puts decoded[0]
+      expect(decoded[0]).to have_key('metadata')
+      expect(decoded[0]['metadata']).to have_key('foo')
+      expect(decoded[0]['metadata']['foo']).to eq('bar')
+      expect(decoded[0]['exp']).to eq(decoded[0]['iat'] + 666)
+    end
+
     it "generates an unauthenticated JWT with shopper_id = empty string" do
       token = factory.generate({shopper_id: ''})
       decoded = JWT.decode(token, example_shared_secret, true, {algorithm: 'HS256'})
