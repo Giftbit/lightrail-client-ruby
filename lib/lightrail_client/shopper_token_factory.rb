@@ -33,7 +33,7 @@ module Lightrail
         end
       end
 
-      if validity_in_seconds < 0
+      if validity_in_seconds <= 0
         raise Lightrail::LightrailArgumentError.new("validity_in_seconds must be > 0")
       end
 
