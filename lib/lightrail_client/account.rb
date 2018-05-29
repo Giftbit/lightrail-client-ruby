@@ -4,8 +4,8 @@ module Lightrail
       validated_params = Lightrail::Validator.set_params_for_account_create!(account_params)
 
       # Make sure contact exists first
-      contact_id = Lightrail::Validator.get_contact_id(account_params)
-      shopper_id = Lightrail::Validator.get_shopper_id(account_params)
+      contact_id = Lightrail::Validator.get_contact_id(validated_params)
+      shopper_id = Lightrail::Validator.get_shopper_id(validated_params)
 
       if contact_id
         contact = Lightrail::Contact.retrieve_by_contact_id(contact_id)
@@ -18,7 +18,7 @@ module Lightrail
       end
 
       # If the contact already has an account in that currency, return it
-      account_card = Lightrail::Account.retrieve({contact_id: contact['contactId'], currency: account_params[:currency]})
+      account_card = Lightrail::Account.retrieve({contact_id: contact['contactId'], currency: validated_params[:currency]})
       return account_card['cardId'] if account_card
 
       params_with_contact_id = validated_params.clone

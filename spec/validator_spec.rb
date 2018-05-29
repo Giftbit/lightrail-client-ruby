@@ -10,6 +10,7 @@ RSpec.describe Lightrail::Validator do
   let(:example_transaction_id) {'this-is-a-transaction-id'}
   let(:example_contact_id) {'this-is-a-contact-id'}
   let(:example_shopper_id) {'this-is-a-shopper-id'}
+  let(:example_email) {'first.last@example.com'}
 
   let(:code_charge_params) {{
       amount: 1,
@@ -197,6 +198,10 @@ RSpec.describe Lightrail::Validator do
     describe ".validate_shopper_id!" do
       it "returns true for a string of the right format" do
         expect(validator.validate_shopper_id! (example_shopper_id)).to be true
+      end
+
+      it "returns true for a standard email address" do
+        expect(validator.validate_shopper_id! (example_email)).to be true
       end
 
       it "raises LightrailArgumentError for any other type" do

@@ -1,6 +1,6 @@
 # Lightrail Client for Ruby
 
-Lightrail is a modern platform for digital account credits, gift cards, promotions, and points (to learn more, visit [Lightrail](https://www.lightrail.com/)). This is a basic library for developers to easily connect with the Lightrail API using Ruby. If you are looking for specific use cases or other languages, check out the complete list of all [Lightrail libraries and integrations](https://github.com/Giftbit/Lightrail-API-Docs/blob/master/docs/client-libraries.md).
+Lightrail is a modern platform for digital account credits, gift cards, promotions, and points (to learn more, visit [Lightrail](https://www.lightrail.com/)). This is a basic library for developers to easily connect with the Lightrail API using Ruby. If you are looking for specific use cases or other languages, check out the complete list of all [Lightrail libraries](https://www.lightrail.com/docs/#client-libraries/client-libraries).
 
 ## Features
 
@@ -9,11 +9,11 @@ The following features are supported in this version:
 - Account Credits: create, retrieve, charge, refund, balance-check, and fund.
 - Gift Cards: charge, refund, balance-check, and fund.
 
-Note that the Lightrail API supports many other features and we are working on covering them in this gem. For a complete list of Lightrail API features check out the [Lightrail API documentation](https://www.lightrail.com/docs/).
+Note that the Lightrail API supports many other features and we are working on covering them in this gem. For a complete list of Lightrail API features check out the [Lightrail API documentation](https://www.lightrail.com/docs/reference/).
 
 ## Related Projects
 
-Check out the full list of [Lightrail client libraries and integrations](https://github.com/Giftbit/Lightrail-API-Docs/blob/master/docs/client-libraries.md). 
+Check out the full list of [Lightrail client libraries](https://www.lightrail.com/docs/#client-libraries/client-libraries). 
 
 ## Usage
 
@@ -27,14 +27,14 @@ Lightrail.api_key = "<your lightrail API key>"
 
 ### Use Case: Account Credits Powered by Lightrail
 
-For a quick demonstration of implementing account credits using this library, see our [Accounts Quickstart](https://github.com/Giftbit/Lightrail-API-Docs/blob/master/docs/quickstart/accounts.md). 
+For a quick demonstration of implementing account credits using this library, see our [Accounts Quickstart](https://www.lightrail.com/docs/#accounts/accounts). 
 
 
 ### Use Case: Gift Cards
 
 **Looking for Lightrail's Drop-In Gift Card Solution?** 
 
-Check out our [Drop-in Gift Card documentation](https://github.com/Giftbit/Lightrail-API-Docs/blob/master/docs/quickstart/drop-in-gift-cards.md#drop-in-gift-cards) to get started.
+Check out our [Drop-in Gift Card documentation](https://www.lightrail.com/docs/#drop-in-gift-cards/drop-in-gift-cards) to get started.
 
 **Prefer to build it yourself?**
 
@@ -167,7 +167,7 @@ gift_charge = Lightrail::Code.charge({
     }
 ```
 
-**A note on idempotency:** All calls to create or act on transactions (refund, void, capture) can optionally take a `userSuppliedId` parameter. The `userSuppliedId` is a client-side identifier (unique string) which is used to ensure idempotency (for more details, see the  [API documentation](https://www.lightrail.com/docs/)). If you do not provide a `userSuppliedId`, the gem will create one for you for any calls that require one.
+**A note on idempotency:** All calls to create or act on transactions (refund, void, capture) can optionally take a `userSuppliedId` parameter. The `userSuppliedId` is a client-side identifier (unique string) which is used to ensure idempotency (for more details, see the  [API documentation](https://www.lightrail.com/docs/reference/)). If you do not provide a `userSuppliedId`, the gem will create one for you for any calls that require one.
 
 ```ruby
 gift_charge = Lightrail::Code.charge({
@@ -180,7 +180,7 @@ gift_charge = Lightrail::Code.charge({
 
 Note that Lightrail does not support currency exchange and the currency provided to these methods must match the currency of the gift card.
 
-For more details on the parameters that you can pass in for a charge request and the response that you will get back, see the [API documentation](https://www.lightrail.com/docs/).
+For more details on the parameters that you can pass in for a charge request and the response that you will get back, see the [API documentation](https://www.lightrail.com/docs/reference/).
 
 #### Authorize-Capture Flow
 
@@ -246,7 +246,7 @@ Lightrail::Transaction.refund(gift_charge)
     }
 ```
 
-Note that this does not necessarily mean that the refunded amount is available for a re-charge. In the edge case where the funds for the original charge came from a promotion which has now expired, refunding will return those funds back to the now-expired value store and therefore the value will not be available for re-charge. To learn more about using value stores for temporary promotions, see the [Lightrail API docs](https://github.com/Giftbit/Lightrail-API-Docs/blob/master/use-cases/promotions.md).
+Note that this does not necessarily mean that the refunded amount is available for a re-charge. In the edge case where the funds for the original charge came from a promotion which has now expired, refunding will return those funds back to the now-expired value store and therefore the value will not be available for re-charge. To learn more about using value stores for temporary promotions, see the [Promotions Quickstart](https://www.lightrail.com/docs/#promotions/promotions).
 
 #### Funding a Gift Card
 
