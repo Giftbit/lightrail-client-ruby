@@ -166,7 +166,7 @@ module Lightrail
     end
 
     def self.validate_shopper_id! (shopper_id)
-      return true if ((shopper_id.is_a? String) && ((/\A[A-Z0-9\-]+\z/i =~ shopper_id).is_a? Integer))
+      return true if ((shopper_id.is_a? String) && ((/\A[A-Z0-9\-\@\.]+\z/i =~ shopper_id).is_a? Integer))
       raise Lightrail::LightrailArgumentError.new("Invalid shopper_id: #{shopper_id.inspect}")
     end
 
