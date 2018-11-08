@@ -1,21 +1,12 @@
 module Lightrail
   class ShopperTokenFactory
-    def self.generate (contact, options=nil)
+    def self.generate (contactId, options=nil)
       raise Lightrail::BadParameterError.new("Lightrail::api_key is not set") unless Lightrail::api_key
       raise Lightrail::BadParameterError.new("Lightrail::shared_secret is not set") unless Lightrail::shared_secret
 
-      raise Lightrail::BadParameterError.new("Must provide a contact with one of shopper_id, contact_id or user_supplied_id to generate a shopper token") unless (Lightrail::Validator.has_valid_or_empty_shopper_id?(contact) ||
-          Lightrail::Validator.has_valid_contact_id?(contact) ||
-          Lightrail::Validator.has_valid_user_supplied_id?(contact))
+      raise Lightrail::BadParameterError.new("Must provide a contactId to generate a shopper token") unless contactId
 
       g = {}
-      if Lightrail::Validator.has_valid_or_empty_shopper_id?(contact)
-        g['shi'] = Lightrail::Validator.get_shopper_id(contact)
-      elsif Lightrail::Validator.has_valid_contact_id?(contact)
-        g['coi'] = Lightrail::Validator.get_contact_id(contact)
-      elsif Lightrail::Validator.has_valid_user_supplied_id?(contact)
-        g['cui'] = Lightrail::Validator.get_user_supplied_id(contact)
-      end
 
       validity_in_seconds = 43200
       metadata = nil
@@ -42,6 +33,8 @@ module Lightrail
 
       g['gui'] = payload['g']['gui']
       g['gmi'] = payload['g']['gmi']
+      g['coi'] = contactId
+      g['tmi'] = payload['g']['tmi']
 
       iat = Time.now.to_i
       payload = {
