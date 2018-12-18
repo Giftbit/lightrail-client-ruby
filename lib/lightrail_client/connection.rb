@@ -20,11 +20,13 @@ module Lightrail
       self.handle_response(resp)
     end
 
-    def self.get(url)
-      resp = Lightrail::Connection.connection.get {|req| req.url url}
+    # todo - queryParams?
+    def self.get(url, queryParams)
+      resp = Lightrail::Connection.connection.get {|req| req.url url, queryParams}
       self.handle_response(resp)
     end
 
+    # Todo - may need to do links from headers. See javascript client.
     def self.handle_response(response)
       body = JSON.parse(response.body) || {}
       message = body['message'] || ''
@@ -32,7 +34,7 @@ module Lightrail
       when 200...300
         JSON.parse(response.body)
       else
-        raise LightrailError.new("Server responded with: (#{response.status}) #{message}", response)
+        raise LightrailError.new("Server responded with: (#{response.status}) #{message}", response.status, response)
       end
     end
   end

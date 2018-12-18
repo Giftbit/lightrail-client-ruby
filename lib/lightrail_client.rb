@@ -9,6 +9,8 @@ require "lightrail_client/version"
 
 require "lightrail_client/errors"
 require "lightrail_client/shopper_token_factory"
+require "lightrail_client/values"
+require "lightrail_client/connection"
 
 module Lightrail
   class << self

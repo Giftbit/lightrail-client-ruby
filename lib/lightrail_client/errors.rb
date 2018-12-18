@@ -1,11 +1,12 @@
 module Lightrail
   class LightrailError < StandardError
-    attr_reader :message
+    attr_reader :message, :status
     attr_accessor :response
 
-    def initialize (message='', response)
+    def initialize (message = '', status = '', response)
       @message = message
       @response = response
+      @status = status
     end
   end
 
