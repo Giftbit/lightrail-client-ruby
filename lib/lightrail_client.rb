@@ -8,6 +8,7 @@ require "base64"
 require "lightrail_client/version"
 
 require "lightrail_client/errors"
+require "lightrail_client/lightrail_response"
 require "lightrail_client/shopper_token_factory"
 require "lightrail_client/values"
 require "lightrail_client/connection"

@@ -21,19 +21,26 @@ module Lightrail
     end
 
     # todo - queryParams?
-    def self.get(url, queryParams)
-      resp = Lightrail::Connection.connection.get {|req| req.url url, queryParams}
+    def self.get(url, query_params)
+      resp = Lightrail::Connection.connection.get {|req| req.url url, query_params}
       self.handle_response(resp)
     end
 
     # Todo - may need to do links from headers. See javascript client.
     def self.handle_response(response)
       body = JSON.parse(response.body) || {}
-      message = body['message'] || ''
+
       case response.status
       when 200...300
-        JSON.parse(response.body)
+        puts response.headers
+        links = response.headers["links"]
+        limit = response.headers["limit"]
+        max_limit = response.headers["maxLimit"]
+        return LightrailResponse.new(body, response.status, links, limit, max_limit)
+
       else
+        # TODO - look at js client and see what we're doing
+        message = body['message'] || ''
         raise LightrailError.new("Server responded with: (#{response.status}) #{message}", response.status, response)
       end
     end

@@ -1,7 +1,7 @@
 module Lightrail
   class LightrailError < StandardError
-    attr_reader :message, :status
-    attr_accessor :response
+    attr_reader :message, :status, :response
+    # attr_accessor :response # todo - why was this done as attr_accessor?
 
     def initialize (message = '', status = '', response)
       @message = message
