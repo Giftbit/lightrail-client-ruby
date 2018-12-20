@@ -1,5 +1,6 @@
 require "bundler/setup"
 require "lightrail_client"
+require "test_helper"
 require "pry"
 
 RSpec.configure do |config|

@@ -7,7 +7,7 @@ RSpec.describe Lightrail::ShopperTokenFactory do
   let(:example_shared_secret) {'secret'}
   let(:example_contact_id) {'this-is-a-contact-id'}
 
-  describe ".generate" do
+  xdescribe ".generate" do
     before(:each) do
       allow(Lightrail).to receive(:api_key).and_return(example_api_key)
       allow(Lightrail).to receive(:shared_secret).and_return(example_shared_secret)
