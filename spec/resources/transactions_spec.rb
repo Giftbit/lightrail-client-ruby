@@ -203,8 +203,8 @@ RSpec.describe Lightrail::Transactions do
       chain = factory.get_transaction_chain(debit_to_capture_id)
       expect(chain.status).to eq(200)
       expect(chain.body.length).to eq(2)
-      expect(chain.body[0]["transactionType"]).to be_in(["debit", "capture"])
-      expect(chain.body[1]["transactionType"]).to be_in(["debit", "capture"])
+      expect(["debit", "capture"]).to include(chain.body[0]["transactionType"])
+      expect(["debit", "capture"]).to include(chain.body[1]["transactionType"])
       expect(chain.body[0]["id"]).to eq(debit_to_capture_id)
     end
 
