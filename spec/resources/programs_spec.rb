@@ -90,7 +90,42 @@ RSpec.describe Lightrail::Programs do
       expect(delete.status).to eq(200)
     end
 
-    # TODO - Basic error handling (see contacts_spec.rb)
+    # Error cases and exception handling
+    it "can't get with non-existent id" do
+      create = factory.get("NON_EXISTENT_ID")
+      expect(create.status).to eq(404)
+    end
+
+    describe "calling get with invalid id arguments" do
+      it "can't get with id = {}  - throws exception" do
+        expect {factory.get({})}.to raise_error do |error|
+          expect(error).to be_a(Lightrail::BadParameterError)
+          expect(error.message).to eq("Argument id must be set.")
+        end
+      end
+
+      it "can't get with id = nil - throws exception" do
+        expect {factory.get(nil)}.to raise_error do |error|
+          expect(error).to be_a(Lightrail::BadParameterError)
+          expect(error.message).to eq("Argument id must be set.")
+        end
+      end
+    end
+
+    it "can't update with non-existent id - throws exception" do
+      expect {factory.update("NON_EXISTENT_ID", {name: "New Name"})}.to raise_error do |error|
+        expect(error).to be_a(Lightrail::LightrailError)
+        expect(error.status).to eq(404)
+      end
+    end
+
+    # Currently a bug in the API
+    # it "can't delete with non-existent id - throws exception" do
+    #   expect {factory.delete("NON_EXISTENT_ID")}.to raise_error do |error|
+    #     expect(error).to be_a(Lightrail::LightrailError)
+    #     expect(error.status).to eq(404)
+    #   end
+    # end
   end
 
 end

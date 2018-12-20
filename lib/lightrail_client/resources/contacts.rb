@@ -18,13 +18,13 @@ module Lightrail
       Lightrail::Connection.patch("#{Lightrail.api_base}/contacts/#{CGI::escape(id)}", params)
     end
 
-    def self.attach_value_to_contact(contact_id, params)
-      Lightrail::Validators.validate_id(contact_id, "contact_id")
-      Lightrail::Connection.post("#{Lightrail.api_base}/contacts/#{CGI::escape(contact_id)}/values/attach", params)
+    def self.attach_value_to_contact(id, params)
+      Lightrail::Validators.validate_id(id, "contact_id")
+      Lightrail::Connection.post("#{Lightrail.api_base}/contacts/#{CGI::escape(id)}/values/attach", params)
     end
 
-    def self.list_contact_values(contact_id, query_params = {})
-      Lightrail::Connection.get("#{Lightrail.api_base}/contacts/#{CGI::escape(contact_id)}/values", query_params)
+    def self.list_contact_values(id, query_params = {})
+      Lightrail::Connection.get("#{Lightrail.api_base}/contacts/#{CGI::escape(id)}/values", query_params)
     end
 
     def self.delete(id)

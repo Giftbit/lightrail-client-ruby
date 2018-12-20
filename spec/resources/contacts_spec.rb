@@ -6,7 +6,7 @@ Dotenv.load
 RSpec.describe Lightrail::Contacts do
   subject(:factory) {Lightrail::Contacts}
 
-  xdescribe "Contact Tests" do
+  describe "Contact Tests" do
     Lightrail.api_key = ENV["LIGHTRAIL_TEST_API_KEY"]
 
     contact_id = SecureRandom.uuid
@@ -109,7 +109,7 @@ RSpec.describe Lightrail::Contacts do
 
     # Error cases and exception handling
     it "can't get a contact that doesn't exist" do
-      create = factory.get("NO_SUCH_CURRENCY")
+      create = factory.get("NON_EXISTENT_ID")
       expect(create.status).to eq(404)
     end
 

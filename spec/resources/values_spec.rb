@@ -6,7 +6,7 @@ Dotenv.load
 RSpec.describe Lightrail::Values do
   subject(:factory) {Lightrail::Values}
 
-  xdescribe "Value Tests" do
+  describe "Value Tests" do
     Lightrail.api_key = ENV["LIGHTRAIL_TEST_API_KEY"]
 
     value_id = SecureRandom.uuid
@@ -31,26 +31,6 @@ RSpec.describe Lightrail::Values do
       expect(create.max_limit).to be_nil
     end
 
-    it "can create a Value passing in string hash keys" do
-      create = factory.create(
-          {
-              "id": SecureRandom.uuid,
-              "currency": "USD",
-              "balance": 15,
-          })
-      expect(create.body["currency"]).to eq("USD")
-      expect(create.body["balance"]).to eq(15)
-    end
-
-    it "can't create a Value without an id - test basic error handling" do
-      expect {factory.create({currency: "USD"})
-      }.to raise_error do |error|
-        expect(error).to be_a(Lightrail::LightrailError)
-        expect(error.status).to eq(422)
-        expect(error.message).to_not be_nil
-      end
-    end
-
     it "can get Value" do
       get = factory.get(value_id)
       expect(get.body["id"]).to eq(value_id)
@@ -59,10 +39,6 @@ RSpec.describe Lightrail::Values do
       expect(get.body["code"]).to eq(last4)
     end
 
-    it "can't get Value with wrong id - returns object not exception" do
-      response = factory.get("NOT_A_VALID_ID")
-      expect(response.status).to eq(404)
-    end
 
     it "can get Value and view fullcode" do
       get = factory.get(value_id, {showCode: true})
@@ -71,23 +47,6 @@ RSpec.describe Lightrail::Values do
       expect(get.body["balance"]).to eq(10)
       expect(get.body["code"]).to eq(full_code)
     end
-
-    describe "calling get with invalid id arguments" do
-      it "can't get Value with id = {}" do
-        expect {factory.get({})}.to raise_error do |error|
-          expect(error).to be_a(Lightrail::BadParameterError)
-          expect(error.message).to eq("Argument id must be set.")
-        end
-      end
-
-      it "can't get Value with id = nil" do
-        expect {factory.get(nil)}.to raise_error do |error|
-          expect(error).to be_a(Lightrail::BadParameterError)
-          expect(error.message).to eq("Argument id must be set.")
-        end
-      end
-    end
-
 
     it "can list Values" do
       list = factory.list({limit: 1})
@@ -116,44 +75,22 @@ RSpec.describe Lightrail::Values do
       expect(update.body["endDate"]).to eq("2088-01-01T00:00:00.000Z")
     end
 
+    new_full_code = SecureRandom.alphanumeric.to_s
+    it "can change a code to a specific code" do
+      factory.change_code(value_id, {code: new_full_code})
 
-    it "can't update a Value with wrong id - results in error" do
-      expect {
-        factory.update("NOT_A_VALID_ID", {frozen: true})
-      }.to raise_error do |error|
-        expect(error).to be_a(Lightrail::LightrailError)
-        expect(error.status).to eq(404)
-      end
+      # lookup full code
+      display_code = factory.get(value_id, {showCode: true})
+      expect(display_code.body["code"]).to eq(new_full_code)
     end
 
-    describe "change code tests" do
-      new_full_code = SecureRandom.alphanumeric.to_s
-      it "can change a code to a specific code" do
-        factory.change_code(value_id, {code: new_full_code})
+    it "can generate a new code" do
+      factory.change_code(value_id, {generateCode: {length: 11}})
 
-        # lookup full code
-        display_code = factory.get(value_id, {showCode: true})
-        expect(display_code.body["code"]).to eq(new_full_code)
-      end
-
-      it "can generate a new code" do
-        factory.change_code(value_id, {generateCode: {length: 11}})
-
-        # lookup full code
-        display_code = factory.get(value_id, {showCode: true})
-        expect(display_code.body["code"]).to_not eq(new_full_code)
-        expect(display_code.body["code"].length).to eq(11)
-      end
-
-      it "can't change a code with wrong id - results in error" do
-        expect {
-          factory.change_code("NOT_A_VALID_ID", {generateCode: {}})
-        }.to raise_error do |error|
-          expect(error).to be_a(Lightrail::LightrailError)
-          expect(error.status).to eq(404)
-          expect(error.message).to_not be_nil
-        end
-      end
+      # lookup full code
+      display_code = factory.get(value_id, {showCode: true})
+      expect(display_code.body["code"]).to_not eq(new_full_code)
+      expect(display_code.body["code"].length).to eq(11)
     end
 
     it "can delete a Value" do
@@ -171,6 +108,55 @@ RSpec.describe Lightrail::Values do
       expect(delete.status).to eq(200)
     end
 
+    # Error handling
+    it "can't create a Value without an id - test basic error handling" do
+      expect {factory.create({currency: "USD"})
+      }.to raise_error do |error|
+        expect(error).to be_a(Lightrail::LightrailError)
+        expect(error.status).to eq(422)
+        expect(error.message).to_not be_nil
+      end
+    end
+
+    it "can't get Value with wrong id - returns object not exception" do
+      response = factory.get("NOT_A_VALID_ID")
+      expect(response.status).to eq(404)
+    end
+
+    describe "calling get with invalid id arguments" do
+      it "can't get Value with id = {}" do
+        expect {factory.get({})}.to raise_error do |error|
+          expect(error).to be_a(Lightrail::BadParameterError)
+          expect(error.message).to eq("Argument id must be set.")
+        end
+      end
+
+      it "can't get Value with id = nil" do
+        expect {factory.get(nil)}.to raise_error do |error|
+          expect(error).to be_a(Lightrail::BadParameterError)
+          expect(error.message).to eq("Argument id must be set.")
+        end
+      end
+    end
+
+    it "can't update a Value with wrong id - results in error" do
+      expect {
+        factory.update("NOT_A_VALID_ID", {frozen: true})
+      }.to raise_error do |error|
+        expect(error).to be_a(Lightrail::LightrailError)
+        expect(error.status).to eq(404)
+      end
+    end
+
+    it "can't change a code with wrong id - results in error" do
+      expect {
+        factory.change_code("NOT_A_VALID_ID", {generateCode: {}})
+      }.to raise_error do |error|
+        expect(error).to be_a(Lightrail::LightrailError)
+        expect(error.status).to eq(404)
+        expect(error.message).to_not be_nil
+      end
+    end
 
     it "can't delete a Value that doesn't exist - results in error" do
       expect {
@@ -180,5 +166,18 @@ RSpec.describe Lightrail::Values do
         expect(error.status).to eq(404)
       end
     end
+
+    # Extra test coverage
+    it "can create a Value passing in string hash keys" do
+      create = factory.create(
+          {
+              "id": SecureRandom.uuid,
+              "currency": "USD",
+              "balance": 15,
+          })
+      expect(create.body["currency"]).to eq("USD")
+      expect(create.body["balance"]).to eq(15)
+    end
+
   end
 end

@@ -6,7 +6,7 @@ Dotenv.load
 RSpec.describe Lightrail::Currencies do
   subject(:factory) {Lightrail::Currencies}
 
-  xdescribe "Currency Tests" do
+  describe "Currency Tests" do
     Lightrail.api_key = ENV["LIGHTRAIL_TEST_API_KEY"]
 
     code = SecureRandom.alphanumeric.to_s
@@ -81,6 +81,13 @@ RSpec.describe Lightrail::Currencies do
 
     it "can't update a currency that doesn't exist - throws exception" do
       expect {factory.update("NO_SUCH_CURRENCY", {name: "New Fake Name To Delete"})}.to raise_error do |error|
+        expect(error).to be_a(Lightrail::LightrailError)
+        expect(error.status).to eq(404)
+      end
+    end
+
+    it "can't delete with non-existent id - throws exception" do
+      expect {factory.delete("NON_EXISTENT_ID")}.to raise_error do |error|
         expect(error).to be_a(Lightrail::LightrailError)
         expect(error.status).to eq(404)
       end
