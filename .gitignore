@@ -15,5 +15,5 @@
 *.iml
 .idea/
 
-# test secrets
+# Test secrets
 .env

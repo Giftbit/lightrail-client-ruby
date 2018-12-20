@@ -50,6 +50,11 @@ After checking out the repo, run `bin/setup` to install dependencies, then run `
 
 To install this gem onto your local machine, run `bundle exec rake install`.
 
+You'll also need to add a .env file.
+```
+LIGHTRAIL_TEST_API_KEY=
+```
+
 ### Publishing
 
 Make sure to bump the version number before publishing changes. 
