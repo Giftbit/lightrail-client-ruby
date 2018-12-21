@@ -38,7 +38,7 @@ Lightrail::Values.create(
     })
 ```
 
-Full argument parameters can be found in the [Lightrail API Docs](https://lightrailapi.docs.apiary.io/#introduction).
+Full argument parameters can be found in the [Lightrail API Docs](https://lightrailapi.docs.apiary.io/#introduction). Arguments should be passed in `camelCased` exactly as they appear in the API Docs.
 
 If you'd like to see more examples of using the gem, our full Ruby tests can be viewed [here](https://github.com/Giftbit/lightrail-client-ruby/tree/master/spec/resources).
 

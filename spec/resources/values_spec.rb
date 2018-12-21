@@ -4,7 +4,7 @@ require "dotenv"
 Dotenv.load
 
 RSpec.describe Lightrail::Values do
-  subject(:factory) {Lightrail::Values}
+  subject(:values) {Lightrail::Values}
 
   describe "Value Tests" do
     Lightrail.api_key = ENV["LIGHTRAIL_TEST_API_KEY"]
@@ -13,7 +13,7 @@ RSpec.describe Lightrail::Values do
     full_code = SecureRandom.alphanumeric.to_s
     last4 = Lightrail::TestHelper.get_last_four(full_code)
     it "can create a Value" do
-      create = factory.create(
+      create = values.create(
           {
               id: value_id,
               currency: "USD",
@@ -32,7 +32,7 @@ RSpec.describe Lightrail::Values do
     end
 
     it "can get Value" do
-      get = factory.get(value_id)
+      get = values.get(value_id)
       expect(get.body["id"]).to eq(value_id)
       expect(get.body["currency"]).to eq("USD")
       expect(get.body["balance"]).to eq(10)
@@ -41,7 +41,7 @@ RSpec.describe Lightrail::Values do
 
 
     it "can get Value and view fullcode" do
-      get = factory.get(value_id, {showCode: true})
+      get = values.get(value_id, {showCode: true})
       expect(get.body["id"]).to eq(value_id)
       expect(get.body["currency"]).to eq("USD")
       expect(get.body["balance"]).to eq(10)
@@ -49,7 +49,7 @@ RSpec.describe Lightrail::Values do
     end
 
     it "can list Values" do
-      list = factory.list({limit: 1})
+      list = values.list({limit: 1})
       expect(list.status).to eq(200)
       expect(list.max_limit).to eq(1000)
       expect(list.limit).to eq(1)
@@ -69,7 +69,7 @@ RSpec.describe Lightrail::Values do
     end
 
     it "can update a Value" do
-      update = factory.update(value_id, {frozen: true, endDate: "2088-01-01T00:00:00.000Z"})
+      update = values.update(value_id, {frozen: true, endDate: "2088-01-01T00:00:00.000Z"})
       expect(update.body["id"]).to eq(value_id)
       expect(update.body["frozen"]).to eq(true)
       expect(update.body["endDate"]).to eq("2088-01-01T00:00:00.000Z")
@@ -77,18 +77,18 @@ RSpec.describe Lightrail::Values do
 
     new_full_code = SecureRandom.alphanumeric.to_s
     it "can change a code to a specific code" do
-      factory.change_code(value_id, {code: new_full_code})
+      values.change_code(value_id, {code: new_full_code})
 
       # lookup full code
-      display_code = factory.get(value_id, {showCode: true})
+      display_code = values.get(value_id, {showCode: true})
       expect(display_code.body["code"]).to eq(new_full_code)
     end
 
     it "can generate a new code" do
-      factory.change_code(value_id, {generateCode: {length: 11}})
+      values.change_code(value_id, {generateCode: {length: 11}})
 
       # lookup full code
-      display_code = factory.get(value_id, {showCode: true})
+      display_code = values.get(value_id, {showCode: true})
       expect(display_code.body["code"]).to_not eq(new_full_code)
       expect(display_code.body["code"].length).to eq(11)
     end
@@ -96,7 +96,7 @@ RSpec.describe Lightrail::Values do
     it "can delete a Value" do
       # delete only works for Value
       value_id_to_delete = SecureRandom.uuid
-      create = factory.create(
+      create = values.create(
           {
               id: value_id_to_delete,
               currency: "USD",
@@ -104,80 +104,91 @@ RSpec.describe Lightrail::Values do
           })
       expect(create.status).to eq(201)
 
-      delete = factory.delete(value_id_to_delete)
+      delete = values.delete(value_id_to_delete)
       expect(delete.status).to eq(200)
     end
 
-    # Error handling
-    it "can't create a Value without an id - test basic error handling" do
-      expect {factory.create({currency: "USD"})
-      }.to raise_error do |error|
-        expect(error).to be_a(Lightrail::LightrailError)
-        expect(error.status).to eq(422)
-        expect(error.message).to_not be_nil
-      end
-    end
-
-    it "can't get Value with wrong id - returns object not exception" do
-      response = factory.get("NOT_A_VALID_ID")
-      expect(response.status).to eq(404)
-    end
-
-    describe "calling get with invalid id arguments" do
-      it "can't get Value with id = {}" do
-        expect {factory.get({})}.to raise_error do |error|
-          expect(error).to be_a(Lightrail::BadParameterError)
-          expect(error.message).to eq("Argument id must be set.")
+    describe "error cases an exception handling" do
+      it "can't create a Value without an id - test basic error handling" do
+        expect {values.create({currency: "USD"})
+        }.to raise_error do |error|
+          expect(error).to be_a(Lightrail::LightrailError)
+          expect(error.status).to eq(422)
+          expect(error.message).to_not be_nil
         end
       end
 
-      it "can't get Value with id = nil" do
-        expect {factory.get(nil)}.to raise_error do |error|
-          expect(error).to be_a(Lightrail::BadParameterError)
-          expect(error.message).to eq("Argument id must be set.")
+      it "can't get Value with wrong id - returns object not exception" do
+        response = values.get("NOT_A_VALID_ID")
+        expect(response.status).to eq(404)
+      end
+
+      describe "calling get with invalid id arguments" do
+        it "can't get Value with id = {}" do
+          expect {values.get({})}.to raise_error do |error|
+            expect(error).to be_a(Lightrail::BadParameterError)
+            expect(error.message).to eq("Argument id must be set.")
+          end
+        end
+
+        it "can't get Value with id = nil" do
+          expect {values.get(nil)}.to raise_error do |error|
+            expect(error).to be_a(Lightrail::BadParameterError)
+            expect(error.message).to eq("Argument id must be set.")
+          end
         end
       end
-    end
 
-    it "can't update a Value with wrong id - results in error" do
-      expect {
-        factory.update("NOT_A_VALID_ID", {frozen: true})
-      }.to raise_error do |error|
-        expect(error).to be_a(Lightrail::LightrailError)
-        expect(error.status).to eq(404)
+      it "can't update a Value with wrong id - results in error" do
+        expect {
+          values.update("NOT_A_VALID_ID", {frozen: true})
+        }.to raise_error do |error|
+          expect(error).to be_a(Lightrail::LightrailError)
+          expect(error.status).to eq(404)
+        end
       end
-    end
 
-    it "can't change a code with wrong id - results in error" do
-      expect {
-        factory.change_code("NOT_A_VALID_ID", {generateCode: {}})
-      }.to raise_error do |error|
-        expect(error).to be_a(Lightrail::LightrailError)
-        expect(error.status).to eq(404)
-        expect(error.message).to_not be_nil
+      it "can't change a code with wrong id - results in error" do
+        expect {
+          values.change_code("NOT_A_VALID_ID", {generateCode: {}})
+        }.to raise_error do |error|
+          expect(error).to be_a(Lightrail::LightrailError)
+          expect(error.status).to eq(404)
+          expect(error.message).to_not be_nil
+        end
       end
-    end
 
-    it "can't delete a Value that doesn't exist - results in error" do
-      expect {
-        factory.delete("NOT_A_VALID_ID")
-      }.to raise_error do |error|
-        expect(error).to be_a(Lightrail::LightrailError)
-        expect(error.status).to eq(404)
+      it "can't delete a Value that doesn't exist - results in error" do
+        expect {
+          values.delete("NOT_A_VALID_ID")
+        }.to raise_error do |error|
+          expect(error).to be_a(Lightrail::LightrailError)
+          expect(error.status).to eq(404)
+        end
       end
     end
 
     # Extra test coverage
     it "can create a Value passing in string hash keys" do
-      create = factory.create(
+      create = values.create(
           {
-              "id": SecureRandom.uuid,
-              "currency": "USD",
-              "balance": 15,
+              "id" => SecureRandom.uuid,
+              "currency" => "USD",
+              "balance" => 15,
           })
       expect(create.body["currency"]).to eq("USD")
       expect(create.body["balance"]).to eq(15)
     end
 
+    it "can create a Value passing in mixed hash" do
+      create = values.create(
+          {
+              id: SecureRandom.uuid,
+              "currency": "USD",
+              "balance" => 15,
+          })
+      expect(create.body["currency"]).to eq("USD")
+      expect(create.body["balance"]).to eq(15)
+    end
   end
 end
