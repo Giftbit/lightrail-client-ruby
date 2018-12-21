@@ -1,32 +1,16 @@
 module Lightrail
   class LightrailError < StandardError
-    attr_reader :message
-    attr_accessor :response
+    attr_reader :message, :status, :response
 
-    def initialize (message='', response)
+    def initialize (message = '', status = nil, response = nil)
       @message = message
       @response = response
+      @status = status
     end
-  end
-
-  class AuthorizationError < LightrailError
-  end
-
-  class InsufficientValueError < LightrailError
   end
 
   class BadParameterError < LightrailError
   end
-
-  class CouldNotFindObjectError < LightrailError
-  end
-
-  class IdempotencyError < LightrailError
-  end
-
-  class ThirdPartyPaymentError < LightrailError
-  end
-
 
   class LightrailArgumentError < ArgumentError
   end

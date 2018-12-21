@@ -6,6 +6,6 @@ RSpec.describe Lightrail do
   end
 
   it "stores the base URL for the Lightrail API" do
-    expect(Lightrail.api_base).to eq('https://dev.lightrail.com/v1').or(eq('https://api.lightrail.com/v1'))
+    expect(Lightrail.api_base).to eq('https://dev.lightrail.com/v2').or(eq('https://api.lightrail.com/v2'))
   end
 end
