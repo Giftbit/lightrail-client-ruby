@@ -48,6 +48,13 @@ RSpec.describe Lightrail::Contacts do
       expect(list.body[0]["email"]).to eq(email)
     end
 
+    it "can list contacts and filter by id.in" do
+      list = contacts.list({"id.in": contact_id})
+      puts list.body
+      expect(list.status).to eq(200)
+      expect(list.body[0]["id"]).to eq(contact_id)
+    end
+
     it "can update contact" do
       update = contacts.update(contact_id, {firstName: "who_is_alice"})
       expect(update.status).to eq(200)
