@@ -93,21 +93,6 @@ RSpec.describe Lightrail::Values do
       expect(display_code.body["code"].length).to eq(11)
     end
 
-    it "can delete a Value" do
-      # delete only works for Value
-      value_id_to_delete = SecureRandom.uuid
-      create = values.create(
-          {
-              id: value_id_to_delete,
-              currency: "USD",
-              balance: 0
-          })
-      expect(create.status).to eq(201)
-
-      delete = values.delete(value_id_to_delete)
-      expect(delete.status).to eq(200)
-    end
-
     describe "error cases an exception handling" do
       it "can't create a Value without an id - test basic error handling" do
         expect {values.create({currency: "USD"})
@@ -189,6 +174,25 @@ RSpec.describe Lightrail::Values do
           })
       expect(create.body["currency"]).to eq("USD")
       expect(create.body["balance"]).to eq(15)
+    end
+
+    it "can create a generic code" do
+      create = values.create({
+                                 id: SecureRandom.uuid,
+                                 currency: "USD",
+                                 code: SecureRandom.alphanumeric.to_s,
+                                 isGenericCode: true,
+                                 discount: true,
+                                 pretax: true,
+                                 genericCodeOptions: {
+                                     perContact: {
+                                         balance: 500,
+                                         usesRemaining: 1
+                                     }
+                                 }
+                             })
+      expect(create.body["genericCodeOptions"]["perContact"]["balance"]).to eq(500)
+      expect(create.body["genericCodeOptions"]["perContact"]["usesRemaining"]).to eq(1)
     end
   end
 end
