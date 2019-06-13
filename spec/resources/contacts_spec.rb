@@ -78,14 +78,21 @@ RSpec.describe Lightrail::Contacts do
       expect(attach.body["contactId"]).to eq(contact_id)
     end
 
-    it "can attach a value to a contact by code" do
+    it "can attach a generic code to a contact" do
       # create the value
       code = SecureRandom.alphanumeric.to_s
+      genericValueId = SecureRandom.uuid
       create = Lightrail::Values.create(
           {
-              id: SecureRandom.uuid,
+              id: genericValueId,
               currency: "USD",
-              balance: 10,
+              isGenericCode: true,
+              genericCodeOptions: {
+                  perContact: {
+                      balance: 100,
+                      usesRemaining: 1
+                  }
+              },
               code: code
           })
       expect(create.status).to eq(201)
@@ -94,6 +101,7 @@ RSpec.describe Lightrail::Contacts do
       attach = contacts.attach_value_to_contact(contact_id, {code: code})
       expect(attach.status).to eq(200)
       expect(attach.body["contactId"]).to eq(contact_id)
+      expect(attach.body["attachedFromValueId"]).to eq(genericValueId)
     end
 
     it "can list contact values - expect 2 attached" do
