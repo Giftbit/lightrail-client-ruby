@@ -61,7 +61,7 @@ RSpec.describe Lightrail::Contacts do
       expect(update.body["firstName"]).to eq("who_is_alice")
     end
 
-    it "can attach a value to a contact by valueId" do
+    it "can attach & detach a value to a contact by valueId" do
       # create the value
       value_id = SecureRandom.uuid
       create = Lightrail::Values.create(
@@ -76,6 +76,11 @@ RSpec.describe Lightrail::Contacts do
       attach = contacts.attach_value_to_contact(contact_id, {valueId: value_id})
       expect(attach.status).to eq(200)
       expect(attach.body["contactId"]).to eq(contact_id)
+
+      # detach
+      detach = contacts.detach_value_from_contact(contact_id, {valueId: value_id})
+      expect(detach.status).to eq(200)
+      expect(detach.body["contactId"]).to be_nil
     end
 
     it "can attach a generic code to a contact" do
@@ -104,10 +109,10 @@ RSpec.describe Lightrail::Contacts do
       expect(attach.body["attachedFromValueId"]).to eq(genericValueId)
     end
 
-    it "can list contact values - expect 2 attached" do
+    it "can list contact values - expect 1 attached" do
       list = contacts.list_contact_values(contact_id)
       expect(list.status).to eq(200)
-      expect(list.body.length).to eq(2)
+      expect(list.body.length).to eq(1)
     end
 
     it "can delete a Contact" do

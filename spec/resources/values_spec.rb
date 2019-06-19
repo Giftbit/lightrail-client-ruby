@@ -142,15 +142,6 @@ RSpec.describe Lightrail::Values do
           expect(error.message).to_not be_nil
         end
       end
-
-      it "can't delete a Value that doesn't exist - results in error" do
-        expect {
-          values.delete("NOT_A_VALID_ID")
-        }.to raise_error do |error|
-          expect(error).to be_a(Lightrail::LightrailError)
-          expect(error.status).to eq(404)
-        end
-      end
     end
 
     # Extra test coverage

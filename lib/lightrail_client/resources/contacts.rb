@@ -23,6 +23,11 @@ module Lightrail
       Lightrail::Connection.post("#{Lightrail.api_base}/contacts/#{CGI::escape(id)}/values/attach", params)
     end
 
+    def self.detach_value_from_contact(id, params)
+      Lightrail::Validators.validate_id(id, "contact_id")
+      Lightrail::Connection.post("#{Lightrail.api_base}/contacts/#{CGI::escape(id)}/values/detach", params)
+    end
+
     def self.list_contact_values(id, query_params = {})
       Lightrail::Connection.get("#{Lightrail.api_base}/contacts/#{CGI::escape(id)}/values", query_params)
     end
