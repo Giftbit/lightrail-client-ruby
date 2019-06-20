@@ -22,10 +22,5 @@ module Lightrail
       Lightrail::Validators.validate_id(id)
       Lightrail::Connection.post("#{Lightrail.api_base}/values/#{CGI::escape(id)}/changeCode", params)
     end
-
-    def self.delete(id)
-      Lightrail::Validators.validate_id(id)
-      Lightrail::Connection.delete("#{Lightrail.api_base}/values/#{CGI::escape(id)}")
-    end
   end
 end
